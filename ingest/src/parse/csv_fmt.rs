@@ -1,6 +1,6 @@
 //! CSV: array columns are separator-delimited inside a single cell.
 
-use crate::record::{btc_to_sats, parse_timestamp, Observation};
+use crate::record::{btc_to_sats, parse_port, parse_timestamp, Observation};
 use anyhow::{Context, Result};
 use std::path::Path;
 
@@ -59,9 +59,9 @@ pub fn parse(path: &Path) -> Result<super::Parsed> {
             Ok(Observation {
                 timestamp: parse_timestamp(get(i_ts))?,
                 src_ip: get(i_sip).to_string(),
-                src_port: get(i_sp).parse().unwrap_or(0),
+                src_port: parse_port(get(i_sp))?,
                 dst_ip: get(i_dip).to_string(),
-                dst_port: get(i_dp).parse().unwrap_or(0),
+                dst_port: parse_port(get(i_dp))?,
                 txid: get(i_txid).to_string(),
                 input_addresses: split_list(get(i_ia)).iter().map(|s| s.to_string()).collect(),
                 output_addresses: split_list(get(i_oa)).iter().map(|s| s.to_string()).collect(),

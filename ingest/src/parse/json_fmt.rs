@@ -1,6 +1,6 @@
 //! JSON: either a top-level array of objects, or one object per line (JSONL).
 
-use crate::record::{btc_to_sats, parse_timestamp, Observation};
+use crate::record::{btc_to_sats, parse_port, parse_timestamp, Observation};
 use anyhow::{Context, Result};
 use serde_json::Value;
 use std::path::Path;
@@ -28,10 +28,17 @@ fn sats(value: Option<&Value>) -> Result<Vec<i64>> {
 fn from_value(v: &Value) -> Result<Observation> {
     let obj = v.as_object().context("record is not an object")?;
     let text = |k: &str| obj.get(k).and_then(|x| x.as_str()).unwrap_or_default().to_string();
-    let port = |k: &str| {
-        obj.get(k)
-            .and_then(|x| x.as_u64().or_else(|| x.as_str().and_then(|s| s.parse().ok())))
-            .unwrap_or(0) as u16
+    // `as u16` would wrap silently: port 70000 becomes 4464.
+    let port = |k: &str| -> Result<u16> {
+        match obj.get(k) {
+            None | Some(Value::Null) => Ok(0),
+            Some(Value::Number(n)) => {
+                let raw = n.as_u64().context("port is not a whole number")?;
+                u16::try_from(raw).with_context(|| format!("port out of range: {raw}"))
+            }
+            Some(Value::String(s)) => parse_port(s),
+            Some(other) => anyhow::bail!("port is not a number or string: {other}"),
+        }
     };
     let fee = match obj.get("fee") {
         Some(Value::String(s)) => btc_to_sats(s)?,
@@ -42,9 +49,9 @@ fn from_value(v: &Value) -> Result<Observation> {
     Ok(Observation {
         timestamp: parse_timestamp(&text("timestamp"))?,
         src_ip: text("src_ip"),
-        src_port: port("src_port"),
+        src_port: port("src_port")?,
         dst_ip: text("dst_ip"),
-        dst_port: port("dst_port"),
+        dst_port: port("dst_port")?,
         txid: text("txid"),
         input_addresses: strings(obj.get("input_addresses")),
         output_addresses: strings(obj.get("output_addresses")),

@@ -4,7 +4,7 @@
 //! memory, and so a truncated file yields the records before the truncation
 //! instead of nothing.
 
-use crate::record::{btc_to_sats, parse_timestamp, Observation};
+use crate::record::{btc_to_sats, parse_port, parse_timestamp, Observation};
 use anyhow::{Context, Result};
 use quick_xml::events::Event;
 use quick_xml::Reader;
@@ -36,9 +36,9 @@ impl Fields {
         Ok(Observation {
             timestamp: parse_timestamp(&self.timestamp)?,
             src_ip: self.src_ip,
-            src_port: self.src_port.parse().unwrap_or(0),
+            src_port: parse_port(&self.src_port)?,
             dst_ip: self.dst_ip,
-            dst_port: self.dst_port.parse().unwrap_or(0),
+            dst_port: parse_port(&self.dst_port)?,
             txid: self.txid,
             input_addresses: self.input_addresses,
             output_addresses: self.output_addresses,
