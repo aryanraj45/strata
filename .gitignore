@@ -1,5 +1,11 @@
 data/*
 !data/.gitkeep
+# The GeoIP databases are committed: the PS requires a complete offline
+# solution, and a clone that cannot resolve an address is not one. Git does
+# not descend into an excluded directory, so the directory itself has to be
+# un-excluded before its contents can be.
+!data/geoip/
+!data/geoip/*
 target/
 __pycache__/
 *.pyc
@@ -7,7 +13,7 @@ __pycache__/
 vendor/
 wheelhouse/
 images.tar
-*.mmdb
+
 .DS_Store
 
 # local reference clones, not part of the project
