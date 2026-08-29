@@ -61,6 +61,13 @@ def main() -> int:
     xm = load_xml(args.data / "strata.xml")
     truth = json.loads((args.data / "ground_truth.json").read_text())
 
+    # An empty dataset is a failure to report, not an exception to raise: the
+    # ratio checks below would divide by zero and the run would look like a
+    # crash rather than a verdict.
+    if not js:
+        print("\n  \033[31m✘\033[0m dataset is empty — nothing to verify\n")
+        return 1
+
     # 1 — the three formats must describe the same dataset
     counts = (len(js), len(cs), len(xm))
     check("format parity: record counts", len(set(counts)) == 1, f"json/csv/xml = {counts}")
@@ -72,11 +79,17 @@ def main() -> int:
         f"{len(txid_sets[0])} distinct txids",
     )
 
+    array_fields = ("input_addresses", "output_addresses", "input_amounts", "output_amounts")
     sample_ok = all(
-        js[i]["input_addresses"] == cs[i]["input_addresses"] == xm[i]["input_addresses"]
+        js[i][f] == cs[i][f] == xm[i][f]
+        for f in array_fields
         for i in range(0, len(js), max(1, len(js) // 50))
     )
-    check("format parity: array fields survive round-trip", sample_ok, "sampled 50 records")
+    check(
+        "format parity: array fields survive round-trip",
+        sample_ok,
+        f"sampled 50 records across {len(array_fields)} array fields",
+    )
 
     # 2 — value conservation
     by_txid = {}

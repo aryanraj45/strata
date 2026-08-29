@@ -171,6 +171,16 @@ class Chain:
         if len(joined) < 3:
             return None
 
+        # `share` was sized for every participant, but underfunded ones were
+        # dropped above. With fewer contributors than planned the inputs can
+        # fall short of the outputs plus fee, which would emit an unbalanced
+        # transaction. Nothing has been mutated yet, so skipping the round here
+        # is clean.
+        total_in = sum((u.amount for u in inputs), Decimal(0))
+        required = denom * len(joined) + fee
+        if total_in < required:
+            return None
+
         out_addrs, out_amounts, owners = [], [], []
         for actor in joined:
             out_addrs.append(self.new_address(actor))
@@ -178,7 +188,6 @@ class Chain:
             owners.append(actor)
 
         # remainders back to each participant, still equal-denominated where possible
-        total_in = sum((u.amount for u in inputs), Decimal(0))
         remainder = quantize(total_in - denom * len(joined) - fee)
         if remainder > SAT:
             out_addrs.append(self.new_address(joined[0]))
