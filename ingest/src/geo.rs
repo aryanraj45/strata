@@ -26,6 +26,33 @@ pub struct GeoCounts {
     pub from_record: usize,
 }
 
+/// Where one field's value came from. Tracked per field rather than per row:
+/// country and ASN are separate databases, and either can miss independently.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Source {
+    Database,
+    Record,
+}
+
+impl Source {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Source::Database => "db",
+            Source::Record => "record",
+        }
+    }
+}
+
+/// A resolved location, with each field carrying its own provenance.
+#[derive(Debug, Clone)]
+pub struct Resolved {
+    pub country: String,
+    pub country_source: Source,
+    pub asn: u32,
+    pub asn_org: String,
+    pub asn_source: Source,
+}
+
 impl GeoResolver {
     /// Loads whichever of the two databases exist. Missing files are not an error.
     pub fn load(dir: Option<&Path>) -> Result<Self> {
@@ -51,15 +78,18 @@ impl GeoResolver {
         self.city.is_some() || self.asn.is_some()
     }
 
-    /// Returns `(country, asn, asn_org, came_from_db)`.
-    pub fn resolve(
-        &self,
-        ip: &str,
-        fallback_country: &str,
-        fallback_asn: u32,
-    ) -> (String, u32, String, bool) {
+    /// Resolve one address, falling back to the record's own fields per field.
+    pub fn resolve(&self, ip: &str, fallback_country: &str, fallback_asn: u32) -> Resolved {
+        let fallback = |country_src, asn_src| Resolved {
+            country: fallback_country.to_string(),
+            country_source: country_src,
+            asn: fallback_asn,
+            asn_org: String::new(),
+            asn_source: asn_src,
+        };
+
         let Ok(addr) = ip.parse::<IpAddr>() else {
-            return (fallback_country.to_string(), fallback_asn, String::new(), false);
+            return fallback(Source::Record, Source::Record);
         };
 
         let country = self.city.as_ref().and_then(|r| {
@@ -67,20 +97,28 @@ impl GeoResolver {
                 .ok()
                 .and_then(|c| c.country.and_then(|c| c.iso_code.map(str::to_string)))
         });
+
+        // A record with no autonomous system number is a miss, not AS0 -- that
+        // number is reserved, and mapping "absent" onto it would be
+        // indistinguishable from a real value downstream.
         let asn = self.asn.as_ref().and_then(|r| {
-            r.lookup::<geoip2::Asn>(addr).ok().map(|a| {
-                (
-                    a.autonomous_system_number.unwrap_or(0),
-                    a.autonomous_system_organization.unwrap_or("").to_string(),
-                )
+            r.lookup::<geoip2::Asn>(addr).ok().and_then(|a| {
+                a.autonomous_system_number.map(|n| {
+                    (n, a.autonomous_system_organization.unwrap_or("").to_string())
+                })
             })
         });
 
-        match (country, asn) {
-            (Some(c), Some((n, org))) => (c, n, org, true),
-            (Some(c), None) => (c, fallback_asn, String::new(), true),
-            (None, Some((n, org))) => (fallback_country.to_string(), n, org, true),
-            (None, None) => (fallback_country.to_string(), fallback_asn, String::new(), false),
+        let mut out = fallback(Source::Record, Source::Record);
+        if let Some(c) = country {
+            out.country = c;
+            out.country_source = Source::Database;
         }
+        if let Some((n, org)) = asn {
+            out.asn = n;
+            out.asn_org = org;
+            out.asn_source = Source::Database;
+        }
+        out
     }
 }

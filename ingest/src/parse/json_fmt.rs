@@ -58,7 +58,8 @@ fn from_value(v: &Value) -> Result<Observation> {
             .and_then(|x| x.as_u64().or_else(|| x.as_str().and_then(|s| s.parse().ok())))
             .unwrap_or(0) as u32,
         asn_org: String::new(),
-        geo_source: String::new(),
+        country_source: String::new(),
+                asn_source: String::new(),
     })
 }
 
@@ -66,13 +67,23 @@ pub fn parse(path: &Path) -> Result<super::Parsed> {
     let text = std::fs::read_to_string(path)
         .with_context(|| format!("reading {}", path.display()))?;
 
+    // Lines the JSONL fallback could not parse. Dropping them silently would
+    // report a truncated JSONL file as a clean run.
+    let mut malformed_lines = 0usize;
+
     let values: Vec<Value> = match serde_json::from_str::<Value>(&text) {
         Ok(Value::Array(items)) => items,
         Ok(other) => vec![other],
         Err(_) => text
             .lines()
             .filter(|l| !l.trim().is_empty())
-            .filter_map(|l| serde_json::from_str(l).ok())
+            .filter_map(|l| match serde_json::from_str(l) {
+                Ok(value) => Some(value),
+                Err(_) => {
+                    malformed_lines += 1;
+                    None
+                }
+            })
             .collect(),
     };
 
@@ -83,7 +94,7 @@ pub fn parse(path: &Path) -> Result<super::Parsed> {
     }
 
     let mut rows = Vec::new();
-    let mut rejected = 0usize;
+    let mut rejected = malformed_lines;
     for value in &values {
         match from_value(value) {
             Ok(obs) if !obs.txid.is_empty() => rows.push(obs),

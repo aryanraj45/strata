@@ -72,7 +72,8 @@ pub fn parse(path: &Path) -> Result<super::Parsed> {
                 geo_country: i_country.map(|i| get(i).to_string()).unwrap_or_default(),
                 asn: i_asn.and_then(|i| get(i).parse().ok()).unwrap_or(0),
                 asn_org: String::new(),
-                geo_source: String::new(),
+                country_source: String::new(),
+                asn_source: String::new(),
             })
         })();
 

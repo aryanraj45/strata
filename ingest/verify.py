@@ -162,13 +162,16 @@ def main() -> int:
 
     # 10 — geo provenance is recorded, never silently assumed
     provenance = db.execute(
-        "SELECT geo_source, count(*) FROM l2 GROUP BY 1 ORDER BY 2 DESC"
+        "SELECT country_source, asn_source, count(*) FROM l2 GROUP BY 1,2 ORDER BY 3 DESC"
     ).fetchall()
-    labelled = one("SELECT count(*) FROM l2 WHERE geo_source IN ('db','record')")
+    labelled = one(
+        "SELECT count(*) FROM l2 WHERE country_source IN ('db','record') "
+        "AND asn_source IN ('db','record')"
+    )
     check(
-        "geo provenance labelled on every row",
+        "geo provenance labelled per field on every row",
         labelled == n_l2,
-        ", ".join(f"{src}={n:,}" for src, n in provenance),
+        ", ".join(f"country={c}/asn={a}: {n:,}" for c, a, n in provenance),
     )
 
     # 11 — country and ASN actually populated, so UC-7 has something to work with

@@ -147,7 +147,8 @@ pub fn write_net_l2(path: &Path, rows: &mut Vec<Observation>) -> Result<usize> {
     let mut country = StringBuilder::new();
     let mut asn = UInt32Builder::new();
     let mut asn_org = StringBuilder::new();
-    let mut geo_src = StringBuilder::new();
+    let mut country_src = StringBuilder::new();
+    let mut asn_src = StringBuilder::new();
     let mut rank = UInt32Builder::new();
 
     let mut current = "";
@@ -168,7 +169,8 @@ pub fn write_net_l2(path: &Path, rows: &mut Vec<Observation>) -> Result<usize> {
         country.append_value(&obs.geo_country);
         asn.append_value(obs.asn);
         asn_org.append_value(&obs.asn_org);
-        geo_src.append_value(&obs.geo_source);
+        country_src.append_value(&obs.country_source);
+        asn_src.append_value(&obs.asn_source);
         rank.append_value(position);
     }
 
@@ -182,7 +184,8 @@ pub fn write_net_l2(path: &Path, rows: &mut Vec<Observation>) -> Result<usize> {
         Field::new("geo_country", DataType::Utf8, false),
         Field::new("asn", DataType::UInt32, false),
         Field::new("asn_org", DataType::Utf8, false),
-        Field::new("geo_source", DataType::Utf8, false),
+        Field::new("country_source", DataType::Utf8, false),
+        Field::new("asn_source", DataType::Utf8, false),
         Field::new("arrival_rank", DataType::UInt32, false),
     ]));
 
@@ -196,7 +199,8 @@ pub fn write_net_l2(path: &Path, rows: &mut Vec<Observation>) -> Result<usize> {
         Arc::new(country.finish()),
         Arc::new(asn.finish()),
         Arc::new(asn_org.finish()),
-        Arc::new(geo_src.finish()),
+        Arc::new(country_src.finish()),
+        Arc::new(asn_src.finish()),
         Arc::new(rank.finish()),
     ];
 
