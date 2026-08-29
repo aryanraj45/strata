@@ -1,0 +1,159 @@
+# STRATA
+
+**Dual-layer Bitcoin transaction forensics.** Correlates peer-to-peer network telemetry with blockchain ledger data to produce ranked, explainable investigative leads — entirely offline.
+
+> Smart India Hackathon 2026 · Problem Statement **26146** · National Technical Research Organisation (NTRO)
+> Theme: Blockchain & Cybersecurity
+
+---
+
+## The idea
+
+The Bitcoin ledger tells you **what** moved. It never tells you **who**.
+
+But before a transaction reaches the ledger, it travels the peer-to-peer network — and in that moment it carries an IP address. That information survives for a few hundred milliseconds and is then discarded forever.
+
+STRATA captures both layers and joins them on time:
+
+| Layer | Contains | Missing |
+|---|---|---|
+| **L1 — Ledger** | TXID, wallets, amounts, fee, script type | any identity |
+| **L2 — Network** | src/dst IP, port, sub-millisecond timestamp, geo/ASN | any money context |
+| **Fusion** | → wallet cluster ↔ candidate origin IP, with confidence | — |
+
+One observation proves nothing. But when a wallet cluster's transactions are first-relayed from the same source in 96 of 140 cases, against a baseline under 1%, chance stops being a plausible explanation.
+
+**Every output is a lead, never a proof.** Confidence is reported, and every score is decomposed into the factors that produced it.
+
+---
+
+## Constraints
+
+Set by the problem statement, not by preference:
+
+- **Fully offline.** No external APIs, no cloud services, no outbound connections at runtime.
+- **Linux deployment target.**
+- **Bulk metadata input** in CSV / JSON / XML.
+- **Synthetic dataset** — no real seized or intercepted data. We generate it, which means we have ground truth.
+- **Explainable output** — a ranked alert list stating why each entity was flagged, with a confidence score.
+
+---
+
+## Architecture
+
+```
+ synthetic data ──┐
+ GeoIP .mmdb ─────┼──▶ Rust ingest ──┬──▶ ClickHouse (bulk)
+ (LN gossip) ─────┘   csv/simd-json  │      tx_l1 · net_l2
+                      quick-xml      └──▶ Neo4j (entity graph)
+                      rayon                Wallet · Cluster · IP · ASN
+                            │
+                            ▼
+                    Fusion + Intelligence
+                    ① ±500ms window on TXID
+                    ② rank relays by arrival
+                    ③ weight w = 1/rank
+                    ④ Σw per (cluster, IP)
+                    ⑤ z-test vs baseline
+                    ⑥ geo/ASN concentration
+                            │
+                    CIOH clustering · RF · IsolationForest
+                    GraphSAGE · SHAP attribution
+                            │
+                            ▼
+                  Streamlit forensic dashboard
+                  ranked alerts · flow graph · evidence · map
+```
+
+### Stack
+
+| Layer | Choice |
+|---|---|
+| Ingest | Rust — `csv`, `simd-json`, `quick-xml`, `rayon`, `maxminddb` |
+| Python bridge | PyO3 + maturin |
+| Hardening | `cargo-fuzz` on all three parser entry points |
+| Bulk store | ClickHouse (MergeTree) |
+| Entity graph | Neo4j Community |
+| ML | scikit-learn → PyTorch Geometric (GraphSAGE) |
+| Explainability | SHAP + GNNExplainer |
+| Dashboard | Streamlit + `streamlit-aggrid` + `st-link-analysis` |
+
+---
+
+## Detection use cases
+
+| ID | Detects |
+|---|---|
+| UC-1 | Entity clustering — many addresses, one actor (CIOH) |
+| UC-2 | Layering / peeling chains |
+| UC-3 | Mixer / CoinJoin participation |
+| UC-4 | Illicit typology classification |
+| **UC-5** | **Network-origin attribution — the core contribution** |
+| UC-6 | Behavioural anomaly (unsupervised) |
+| UC-7 | Geo / ASN anomaly — VPN rotation, impossible travel |
+| UC-8 | Structuring / threshold evasion |
+| UC-9 | Wallet-software fingerprinting |
+| UC-10 | Cash-out point detection |
+
+The problem statement references a table of AI/ML focus areas that was never attached (the placeholder text remains live on the portal). These use cases are derived strictly from the crime types and data fields the statement itself names.
+
+---
+
+## Repository layout
+
+```
+generator/     synthetic dataset generator + ground truth      [phase 0]
+ingest/        Rust parser, GeoIP enrichment, fuzz targets     [phase 1]
+cluster/       CoinJoin filter, CIOH, change heuristics        [phase 2]
+fusion/        the dual-layer correlation engine               [phase 3]
+graph/         Neo4j loaders and Cypher queries                [phase 4]
+models/        RF, IsolationForest, GraphSAGE, SHAP            [phase 5]
+dashboard/     Streamlit app                                   [phase 6]
+docs/          technical write-up                              [phase 7]
+data/          GeoIP .mmdb, datasets (gitignored where large)
+```
+
+---
+
+## Build order
+
+Phase 0 first — nothing else can be measured without it.
+
+1. **Synthetic data generator** — PS field list, planted peeling chains and CoinJoins, realistic propagation jitter, decoys, ground-truth file
+2. **Rust ingest** + GeoIP enrichment → ClickHouse
+3. **CoinJoin filter → CIOH clustering** (order matters; filtering second corrupts every result)
+4. **Fusion engine** — the project
+5. **Neo4j graph** + peeling-chain traversal
+6. **RF + IsolationForest + SHAP**
+7. **Streamlit dashboard**
+8. **Technical write-up**
+
+Then, if time allows: `cargo-fuzz` hardening, GraphSAGE comparison, Lightning funding detector.
+
+---
+
+## Offline deployment
+
+Everything is vendored before it is needed. `cargo build`, `pip install` and `docker pull` all fail on an air-gapped machine.
+
+```bash
+cargo vendor > .cargo/config.toml
+pip download -r requirements.txt -d ./wheelhouse
+docker save clickhouse/clickhouse-server neo4j:community -o images.tar
+```
+
+Full dry run with the network adapter disabled, on the actual demo machine, at least a day early.
+
+---
+
+## Notes
+
+- `streamlit-aggrid` must be `>= 1.2.0` — earlier releases enabled AG Grid **Enterprise** modules by default, which require a paid licence. Community features only.
+- `st-link-analysis` node icons: use the **name** form, never the URL form. A URL is an outbound call.
+- Split Elliptic++ by **time**, never randomly — a random split leaks the future into training.
+
+---
+
+## Status
+
+Pre-alpha. Nothing built yet.

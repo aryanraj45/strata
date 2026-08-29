@@ -1,0 +1,11 @@
+data/*
+!data/.gitkeep
+target/
+__pycache__/
+*.pyc
+.venv/
+vendor/
+wheelhouse/
+images.tar
+*.mmdb
+.DS_Store
