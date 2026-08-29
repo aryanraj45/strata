@@ -38,6 +38,21 @@ impl Observation {
     }
 }
 
+/// Parse a port, rejecting anything non-numeric or out of range.
+///
+/// An empty field means absent and becomes 0. A field that is present but not a
+/// valid port is malformed evidence: silently rewriting it to 0, or truncating
+/// it with `as u16`, would contradict the guarantee that bad rows are rejected
+/// rather than quietly accepted.
+pub fn parse_port(text: &str) -> Result<u16> {
+    let text = text.trim();
+    if text.is_empty() {
+        return Ok(0);
+    }
+    text.parse::<u16>()
+        .with_context(|| format!("invalid port: {text}"))
+}
+
 /// Parse a decimal BTC string into satoshis without going through f64.
 ///
 /// Accepts `0.42`, `0.42000000`, `12`, `-0.5`. Rejects anything with more than
@@ -95,12 +110,26 @@ pub fn parse_timestamp(text: &str) -> Result<i64> {
     let month: i64 = date_parts.next().context("no month")?.parse()?;
     let day: i64 = date_parts.next().context("no day")?.parse()?;
 
-    // Strip any offset; the generator emits UTC.
-    let rest = rest.split(['+']).next().unwrap_or(rest);
+    // Strip a trailing offset. RFC 3339 allows either sign, and the '-' case has
+    // to be found from the right so it is not mistaken for a date separator.
+    // The generator emits UTC, but evidence collected elsewhere may not.
+    let rest = match rest.find('+') {
+        Some(i) => &rest[..i],
+        None => match rest.rfind('-') {
+            Some(i) => &rest[..i],
+            None => rest,
+        },
+    };
+
     let (clock, micros) = match rest.split_once('.') {
         Some((c, frac)) => {
             let frac: String = frac.chars().take(6).collect();
-            let scaled: i64 = frac.parse().unwrap_or(0);
+            // A non-numeric fraction is malformed evidence. Treating it as
+            // .000000 would silently accept a truncated timestamp.
+            if frac.is_empty() || !frac.chars().all(|ch| ch.is_ascii_digit()) {
+                bail!("malformed fractional seconds: {text}");
+            }
+            let scaled: i64 = frac.parse()?;
             (c, scaled * 10_i64.pow(6 - frac.len() as u32))
         }
         None => (rest, 0),
@@ -169,5 +198,22 @@ mod tests {
         assert!(parse_timestamp("").is_err());
         assert!(parse_timestamp("not-a-date").is_err());
         assert!(parse_timestamp("2026-13-01T00:00:00Z").is_err());
+        assert!(parse_timestamp("2026-08-01T00:00:00.abcZ").is_err());
+    }
+
+    #[test]
+    fn offsets_of_either_sign_are_stripped() {
+        let utc = parse_timestamp("2026-08-01T05:00:00Z").unwrap();
+        assert_eq!(parse_timestamp("2026-08-01T05:00:00+05:30").unwrap(), utc);
+        assert_eq!(parse_timestamp("2026-08-01T05:00:00-05:00").unwrap(), utc);
+    }
+
+    #[test]
+    fn ports_reject_garbage_and_overflow() {
+        assert_eq!(parse_port("8333").unwrap(), 8333);
+        assert_eq!(parse_port("").unwrap(), 0);
+        assert!(parse_port("70000").is_err());   // would wrap to 4464 under `as u16`
+        assert!(parse_port("abc").is_err());
+        assert!(parse_port("-1").is_err());
     }
 }
