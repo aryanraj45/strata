@@ -16,11 +16,10 @@ from __future__ import annotations
 # on one only when the signals clearly agree. Lower-confidence guesses are still
 # reported for an analyst to review — they just do not move the cluster
 # boundaries on their own.
-# Set so that a decision carried by raggedness alone is acted on, while one
-# carried by freshness alone is only reported. That boundary is where the
-# observed errors sit, and it follows from which signal is actually reliable
-# rather than from tuning to a number.
-MERGE_MIN_CONFIDENCE = 0.45
+# A change call moves cluster boundaries only when raggedness backed it, and
+# with enough margin. Every observed error was a call the other signals made
+# without raggedness, so this is a structural rule rather than a tuned cutoff.
+MERGE_MIN_CONFIDENCE = 0.40
 
 
 class UnionFind:
@@ -91,6 +90,7 @@ def cluster(
         if (
             use_change
             and tx.get("change_address")
+            and tx.get("change_corroborated")
             and tx.get("change_confidence", 0.0) >= min_change_confidence
         ):
             uf.union(inputs[0], tx["change_address"])

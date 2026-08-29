@@ -218,9 +218,31 @@ class World:
         if tx is not None:
             self.truth["cashouts"].append({"txid": tx.txid, "actor_id": actor.actor_id})
 
+    def exchange_sweeps(self, n: int, days: int) -> None:
+        """Exchanges consolidate deposits into a hot wallet.
+
+        Without this, an exchange's receiving addresses are never spent, and
+        "this output was spent again later" would identify change for free
+        rather than being a signal that has to discriminate.
+        """
+        for _ in range(n):
+            ex = self.rng.choice(self.by_kind[ActorKind.EXCHANGE])
+            other = self.rng.choice([a for a in self.by_kind[ActorKind.EXCHANGE] if a is not ex])
+            balance = self.chain.balance(ex.actor_id)
+            if balance < Decimal("1"):
+                continue
+            self.chain.spend(
+                ex,
+                [(other, (balance * Decimal("0.3")).quantize(Decimal("0.00000001")))],
+                self._ts(self.rng.uniform(0, days)),
+                pattern="sweep",
+                n_inputs_hint=self.rng.randint(4, 10),
+            )
+
     def run(self, days: int = 14, volume: int = 900) -> None:
         self.normal_traffic(int(volume * 0.62), days)
         self.consolidations(int(volume * 0.12), days)
+        self.exchange_sweeps(max(4, int(volume * 0.03)), days)
 
         for _ in range(max(2, days // 3)):
             self.coinjoin_round(self.rng.uniform(0, days))

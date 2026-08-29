@@ -60,6 +60,14 @@ def main() -> int:
         tx["coinjoin_denomination"] = verdict.denomination
         n_cj += bool(verdict.is_coinjoin)
 
+    # When each address was first spent. Computed once over the whole ledger so
+    # the change heuristic can ask whether an output moved on again shortly after
+    # it was created.
+    spent_at: dict[str, int] = {}
+    for tx in txs:
+        for addr in tx["input_addresses"]:
+            spent_at.setdefault(addr, tx["ts_micro"])
+
     # Stage 2 - change identification, walking forward in time so "previously
     # seen" means what it says.
     seen: set[str] = set()
@@ -67,12 +75,14 @@ def main() -> int:
     conf_total = 0.0
     for tx in txs:
         guess = identify_change(
-            tx["output_addresses"], tx["output_amounts"], tx["script_type"], seen
+            tx["output_addresses"], tx["output_amounts"], tx["script_type"], seen,
+            spent_at=spent_at, now=tx["ts_micro"],
         )
         tx["change_address"] = (
             tx["output_addresses"][guess.index] if guess.index is not None else None
         )
         tx["change_confidence"] = guess.confidence
+        tx["change_corroborated"] = guess.corroborated
         if guess.index is not None:
             n_change += 1
             conf_total += guess.confidence
@@ -99,13 +109,13 @@ def main() -> int:
     flags = args.store / "tx_flags.parquet"
     db.execute(
         "CREATE TABLE flags (txid VARCHAR, is_coinjoin BOOLEAN, coinjoin_reason VARCHAR, "
-        "change_address VARCHAR, change_confidence DOUBLE)"
+        "change_address VARCHAR, change_confidence DOUBLE, change_corroborated BOOLEAN)"
     )
     db.executemany(
-        "INSERT INTO flags VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO flags VALUES (?, ?, ?, ?, ?, ?)",
         [
             (t["txid"], t["is_coinjoin"], t["coinjoin_reason"],
-             t["change_address"], t["change_confidence"])
+             t["change_address"], t["change_confidence"], t["change_corroborated"])
             for t in txs
         ],
     )
