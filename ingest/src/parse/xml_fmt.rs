@@ -49,7 +49,8 @@ impl Fields {
             geo_country: self.geo_country,
             asn: self.asn.parse().unwrap_or(0),
             asn_org: String::new(),
-            geo_source: String::new(),
+            country_source: String::new(),
+                asn_source: String::new(),
         })
     }
 }

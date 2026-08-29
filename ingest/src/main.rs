@@ -93,13 +93,14 @@ fn main() -> Result<()> {
     let counts = rows
         .par_iter_mut()
         .map(|obs| {
-            let (country, asn, org, from_db) =
-                resolver.resolve(&obs.src_ip, &obs.geo_country, obs.asn);
-            obs.geo_country = country;
-            obs.asn = asn;
-            obs.asn_org = org;
-            obs.geo_source = if from_db { "db" } else { "record" }.to_string();
-            from_db
+            let r = resolver.resolve(&obs.src_ip, &obs.geo_country, obs.asn);
+            obs.geo_country = r.country;
+            obs.asn = r.asn;
+            obs.asn_org = r.asn_org;
+            obs.country_source = r.country_source.as_str().to_string();
+            obs.asn_source = r.asn_source.as_str().to_string();
+            // Counted as database-served only when both fields came from it.
+            r.country_source == geo::Source::Database && r.asn_source == geo::Source::Database
         })
         .fold(
             geo::GeoCounts::default,

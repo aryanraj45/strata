@@ -25,8 +25,10 @@ pub struct Observation {
     pub asn: u32,
     /// Filled by enrichment, not by the parsers.
     pub asn_org: String,
-    /// Which path produced the geo fields: `"db"` or `"record"`.
-    pub geo_source: String,
+    /// Which path produced the country: `"db"` or `"record"`.
+    pub country_source: String,
+    /// Which path produced the ASN: `"db"` or `"record"`.
+    pub asn_source: String,
 }
 
 impl Observation {
