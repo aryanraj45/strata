@@ -9,3 +9,12 @@ wheelhouse/
 images.tar
 *.mmdb
 .DS_Store
+
+# local reference clones, not part of the project
+.reference/
+
+# rust build artifacts
+ingest/target/
+
+# generated store
+store/
