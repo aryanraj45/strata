@@ -1,0 +1,582 @@
+<title>STRATA — Full Project Explanation (Simple)</title>
+<style>
+:root{
+  --bg:#000000;
+  --card:#0d0d0d;
+  --card2:#111214;
+  --line:#262626;
+  --text:#f2f2f2;
+  --dim:#a6a6a6;
+  --green:#3ddc97;
+  --yellow:#ffc857;
+  --blue:#5eb3e4;
+  --red:#ff6b81;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  font-size:19px;line-height:1.75;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px}
+h1{font-size:2.1rem;line-height:1.25;margin:0 0 14px;font-weight:700}
+h2{font-size:1.5rem;margin:0 0 6px;font-weight:700;color:var(--green)}
+h3{font-size:1.12rem;margin:0 0 4px;font-weight:600}
+p{margin:0}
+.dim{color:var(--dim)}
+.small{font-size:.92rem}
+a{color:var(--blue)}
+
+header{padding:60px 0 40px;border-bottom:1px solid var(--line)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:100px;
+  padding:5px 14px;font-size:.8rem;color:var(--yellow);margin-bottom:20px;margin-right:8px}
+.by{margin-top:22px;font-size:.9rem;color:var(--dim)}
+.by b{color:var(--green)}
+
+section{padding:46px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.num{font-size:.8rem;color:var(--yellow);letter-spacing:.15em;font-weight:600}
+
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px 22px;
+  display:flex;flex-direction:column;gap:8px}
+.box.green{border-left:4px solid var(--green)}
+.box.yellow{border-left:4px solid var(--yellow)}
+.box.blue{border-left:4px solid var(--blue)}
+.box.red{border-left:4px solid var(--red)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* diagram */
+.dia{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:22px;overflow-x:auto}
+.dia svg{display:block;min-width:560px;width:100%;height:auto}
+svg text{font-family:"Segoe UI",system-ui,Arial,sans-serif;fill:#f2f2f2;font-size:13px}
+svg text.s{font-size:11px;fill:#a6a6a6}
+svg text.h{font-size:12px;fill:#3ddc97;font-weight:700}
+svg rect.b{fill:#141414;stroke:#333;stroke-width:1}
+svg rect.g{fill:#0c1f18;stroke:#3ddc97;stroke-width:1.4}
+svg rect.y{fill:#1f1806;stroke:#ffc857;stroke-width:1.4}
+svg rect.bl{fill:#0d1720;stroke:#5eb3e4;stroke-width:1.4}
+svg path.a{stroke:#555;stroke-width:2;fill:none;marker-end:url(#h)}
+svg path.ag{stroke:#3ddc97;stroke-width:2;fill:none;marker-end:url(#hg)}
+.cap{font-size:.88rem;color:var(--dim);margin-top:12px;text-align:center}
+
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--yellow);font-size:.82rem}
+td{padding:10px 12px;border-bottom:1px solid #1a1a1a;vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tblbox{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+
+ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+li::marker{color:var(--green)}
+ol{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:12px}
+ol li::marker{color:var(--green);font-weight:700}
+
+.stat{display:inline-flex;flex-direction:column;background:var(--card2);border:1px solid var(--line);
+  border-radius:8px;padding:12px 16px;min-width:120px}
+.stat b{font-size:1.4rem;color:var(--green)}
+.stat span{font-size:.78rem;color:var(--dim)}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+
+.term{color:var(--yellow)}
+.term::before{content:"[ "}
+.term::after{content:" ]"}
+
+.story{background:#0a0f0d;border:1px dashed #2a5a44;border-radius:8px;padding:18px 22px;
+  display:flex;flex-direction:column;gap:8px}
+.story h4{color:var(--green);font-size:.95rem;margin:0;display:flex;align-items:center;gap:8px}
+.story h4::before{content:"📖";font-size:1rem}
+.story p{font-size:.95rem;line-height:1.65}
+.story b{color:var(--yellow)}
+
+.toc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px 22px}
+.toc a{display:block;padding:4px 0;color:var(--text);text-decoration:none}
+.toc a:hover{color:var(--green)}
+.toc span{color:var(--dim);font-size:.85rem}
+
+footer{padding:44px 0 70px;text-align:center;color:var(--dim);font-size:.92rem}
+footer .name{color:var(--green);font-weight:700;font-size:1.1rem;display:block;margin-top:6px}
+
+@media (max-width:700px){
+  body{font-size:17px}
+  h1{font-size:1.7rem}
+  .two{grid-template-columns:1fr}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="tag">SIH 2026 · Problem 26146 · NTRO</span>
+  <span class="tag">STRATA</span>
+  <h1>STRATA — What We Are Building, End to End</h1>
+  <p class="dim">A simple, complete explanation of the project — what each part does, why it exists,
+  what we actually built, and the real numbers it produces. Every technical word is explained
+  in a <span class="term">yellow box</span> like this.</p>
+  <p class="by">Created by <b>Raj Aryan</b> · Team STRATA</p>
+
+  <div class="toc" style="margin-top:24px">
+    <a href="#idea"><b>1.</b> The idea in one page <span>— what problem, why it matters</span></a>
+    <a href="#stack"><b>2.</b> What we used, and why <span>— every tool explained</span></a>
+    <a href="#pipeline"><b>3.</b> The six stages <span>— step by step, with real numbers</span></a>
+    <a href="#status"><b>4.</b> What's done vs what's left</a>
+    <a href="#usage"><b>5.</b> How to actually run it</a>
+    <a href="#demo"><b>6.</b> How we will demo it</a>
+  </div>
+</header>
+
+<!-- ============ 1 ============ -->
+<section id="idea">
+  <p class="num">1 — THE IDEA</p>
+  <h2>What problem are we solving?</h2>
+  <p>Bitcoin's public record (called the <span class="term">ledger — the permanent notebook that records
+  every Bitcoin payment ever made, visible to anyone in the world</span>) shows every single payment ever
+  made. But it never shows names — only long codes like <code class="dim">bc1qar0s...</code>.</p>
+  <p>So police can see money moving, but not who is moving it. Criminals — ransomware gangs, darknet
+  sellers, extortionists, money launderers — use this to hide.</p>
+
+  <div class="box green">
+    <h3>Our idea</h3>
+    <p>Before a Bitcoin payment reaches the public notebook, it first travels across the internet
+    for a fraction of a second — and in that moment it carries the sender's real
+    <span class="term">IP address — the internet "house address" of the sender's computer</span>.
+    Everyone ignores this moment. We capture it and match it back to the payment.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>9</b><span>PS requirements</span></div>
+    <div class="stat"><b>6</b><span>pipeline stages built</span></div>
+    <div class="stat"><b>53/55</b><span>automated checks passing</span></div>
+    <div class="stat"><b>99.3%</b><span>attribution accuracy</span></div>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="stack">
+  <p class="num">2 — WHAT WE USED, AND WHY</p>
+  <h2>Every tool, in plain words</h2>
+
+  <div class="tblbox">
+    <table>
+      <tr><th>Tool</th><th>What it is</th><th>Why we picked it</th></tr>
+      <tr>
+        <td><b>Rust</b></td>
+        <td>A programming language known for being both very fast and very safe
+        against crashes.</td>
+        <td>Our data-reading code has to survive damaged/incomplete files without
+        crashing on stage. Rust forces us to handle every error instead of guessing.</td>
+      </tr>
+      <tr>
+        <td><b>Python</b></td>
+        <td>The most common language for data science and AI.</td>
+        <td>Everything after the raw parsing — clustering, graphs, the AI model,
+        the dashboard — is Python, so the whole team can read and edit it.</td>
+      </tr>
+      <tr>
+        <td><b>DuckDB</b></td>
+        <td><span class="term">an embedded database — a database that lives inside a single file,
+        with no separate server to install or run</span></td>
+        <td>We needed to store and search millions of transaction records fast.
+        DuckDB does this without needing a database server — perfect for a laptop
+        with no internet.</td>
+      </tr>
+      <tr>
+        <td><b>Parquet</b></td>
+        <td><span class="term">a file format for storing tables of data very compactly and
+        very fast to search</span></td>
+        <td>Our stored data (millions of rows) needs to load in milliseconds, not
+        minutes. Parquet is the industry standard for this.</td>
+      </tr>
+      <tr>
+        <td><b>GeoIP database</b></td>
+        <td>A downloadable file that maps an IP address to a country and network
+        provider.</td>
+        <td>The problem statement explicitly asks for this. We use a free one
+        called DB-IP, stored inside our own project — no internet needed to use it.</td>
+      </tr>
+      <tr>
+        <td><b>scikit-learn</b></td>
+        <td>The standard Python library for building AI/ML models.</td>
+        <td>Builds our two detection models — explained in Stage 5 below.</td>
+      </tr>
+      <tr>
+        <td><b>SHAP</b></td>
+        <td><span class="term">a library that explains an AI model's decision — showing exactly which
+        input caused how much of the final score</span></td>
+        <td>The problem statement demands "explainable" results. SHAP is how we
+        turn a plain number like "0.91" into "0.91 because of X, Y, Z".</td>
+      </tr>
+      <tr>
+        <td><b>Streamlit</b> <span class="dim small">(building now)</span></td>
+        <td>A Python tool that turns a normal Python script into a website/dashboard,
+        with no separate web-development work needed.</td>
+        <td>Lets us build the investigator's dashboard fast, in the same language
+        as everything else.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="box yellow">
+    <h3>Why offline matters (the most important rule)</h3>
+    <p>The problem statement says the whole system must work with <b>zero internet connection</b>.
+    That's why every choice above avoids anything that needs a server or a live internet call —
+    the GeoIP file is downloaded once and stored inside our project, DuckDB needs no server,
+    and our own code never calls out to the internet.</p>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="pipeline">
+  <p class="num">3 — THE SIX STAGES</p>
+  <h2>How data flows through the system</h2>
+
+  <div class="box green">
+    <h3>📖 Follow one case through all six stages</h3>
+    <p>To make this real, we'll follow one made-up case from start to finish:</p>
+    <p><b>The scenario:</b> A hospital's computers get locked by ransomware. The attacker demands
+    <b>2 BTC</b> to unlock them. The hospital pays. That 2 BTC now has to travel through the criminal's
+    hands, get cleaned, and eventually turn into real cash — and every step of that journey leaves a
+    trace in our system. Watch how each stage below catches a different part of the trail.</p>
+  </div>
+
+  <div class="dia">
+    <svg viewBox="0 0 900 260" role="img" aria-label="Diagram of the six pipeline stages: generator, ingest, cluster, graph, fusion, models, feeding into a dashboard">
+      <defs>
+        <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+        <marker id="hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3ddc97"/></marker>
+      </defs>
+
+      <rect class="y" x="10" y="20" width="120" height="60" rx="6"/>
+      <text class="h" x="22" y="44">1 · GENERATOR</text>
+      <text class="s" x="22" y="62">makes fake data</text>
+      <text class="s" x="22" y="76">with known answers</text>
+
+      <path class="a" d="M132,50 L166,50"/>
+      <rect class="bl" x="170" y="20" width="120" height="60" rx="6"/>
+      <text class="h" x="182" y="44" fill="#5eb3e4">2 · INGEST</text>
+      <text class="s" x="182" y="62">reads CSV/JSON/XML</text>
+      <text class="s" x="182" y="76">(written in Rust)</text>
+
+      <path class="a" d="M290,50 L324,50"/>
+      <rect class="b" x="328" y="20" width="120" height="60" rx="6"/>
+      <text class="h" x="340" y="44" style="fill:#f2f2f2">3 · CLUSTER</text>
+      <text class="s" x="340" y="62">groups wallets</text>
+      <text class="s" x="340" y="76">into real people</text>
+
+      <path class="a" d="M448,50 L482,50"/>
+      <rect class="b" x="486" y="20" width="120" height="60" rx="6"/>
+      <text class="h" x="498" y="44" style="fill:#f2f2f2">4 · GRAPH</text>
+      <text class="s" x="498" y="62">finds money-laundering</text>
+      <text class="s" x="498" y="76">chains</text>
+
+      <path class="a" d="M606,50 L640,50"/>
+      <rect class="g" x="644" y="20" width="120" height="60" rx="6"/>
+      <text class="h" x="656" y="44">5 · FUSION</text>
+      <text class="s" x="656" y="62">matches wallet to</text>
+      <text class="s" x="656" y="76">the real IP address</text>
+
+      <path class="a" d="M764,50 L798,50"/>
+      <rect class="y" x="802" y="20" width="90" height="60" rx="6"/>
+      <text class="h" x="812" y="44" style="font-size:11px">6 · AI MODEL</text>
+      <text class="s" x="812" y="62">risk score</text>
+      <text class="s" x="812" y="76">+ reasons</text>
+
+      <path class="ag" d="M400,80 L400,190"/>
+      <text class="s" x="360" y="205" fill="#3ddc97">all six stages feed one shared file (Parquet) that the</text>
+      <text class="s" x="360" y="220" fill="#3ddc97">dashboard reads directly — no copying data around</text>
+
+      <rect class="g" x="330" y="230" width="230" height="24" rx="4"/>
+      <text style="font-size:11px" x="345" y="246">7 · DASHBOARD (building now)</text>
+    </svg>
+    <p class="cap">Each box below is one folder in our code. Data flows left to right, one stage feeding the next.</p>
+  </div>
+
+  <!-- Stage 1 -->
+  <div class="box">
+    <h3>Stage 1 — The Generator (folder: <code>generator/</code>)</h3>
+    <p>The problem statement says <b>no real data will be given to us</b> — we must build a fake
+    (but realistic) dataset ourselves. So we wrote a program that pretends to be a small Bitcoin
+    network: 74 fake people (normal users, exchanges, and criminals), all sending each other money
+    over 45 days.</p>
+    <p class="dim small">Real-life example: like a flight simulator. It's not a real plane, but every
+    dial and reaction behaves like a real one — so training on it actually prepares you for the real thing.</p>
+    <div class="box yellow" style="margin-top:4px">
+      <h3>Why this is actually an advantage, not a limitation</h3>
+      <p>Because <em>we</em> planted the criminals, <em>we</em> know exactly who they are.
+      That means we can check our own answers — "did the AI actually catch the criminal we planted?"
+      — instead of just guessing that it works.</p>
+    </div>
+    <p><b>Result: 12 out of 12 automated checks pass</b> — including a check that if we break the
+    simulation on purpose, the check correctly starts failing (proving the check isn't fake).</p>
+
+    <div class="story">
+      <h4>Where our story begins</h4>
+      <p>Among our 74 fake people, we planted 3 "ransomware" actors — exactly like the hospital
+      attacker. One of them, entity <b>E-0066</b>, receives ransom payments and then tries to launder
+      them. Because <em>we</em> planted this actor, we secretly know the full truth: which wallets are
+      theirs, which IP address they broadcast from, and every step they took to hide it. The rest of
+      this page is about whether our system can figure that out <em>without</em> being told — using
+      only what a real investigator would see.</p>
+    </div>
+  </div>
+
+  <!-- Stage 2 -->
+  <div class="box">
+    <h3>Stage 2 — Ingest (folder: <code>ingest/</code>)</h3>
+    <p>This is the program (written in <b>Rust</b>) that reads the raw files — CSV, JSON, XML — and
+    turns them into one clean, fast-to-search format. It also looks up each sender's country using
+    the GeoIP file.</p>
+    <p class="dim small">Real-life example: like airport immigration. Every passenger comes from a
+    different country in a different format (different passports, different languages) — immigration
+    turns all of them into one standard entry record, and stamps their nationality.</p>
+    <div class="stats">
+      <div class="stat"><b>40,000+</b><span>records / second</span></div>
+      <div class="stat"><b>0</b><span>crashes on broken files</span></div>
+      <div class="stat"><b>11/11</b><span>checks passing</span></div>
+    </div>
+    <p>We deliberately fed it broken, corrupted files (missing data, wrong numbers, truncated files)
+    to prove it never crashes — it just skips the bad row and reports it, exactly like a real
+    forensic tool must.</p>
+
+    <div class="story">
+      <h4>Our case, at this stage</h4>
+      <p>The hospital's ransom payment — and thousands of other unrelated payments happening at the
+      same time — arrive as raw CSV/JSON/XML files. Ingest reads all of them, in whichever format
+      they came in, and turns E-0066's ransom transaction into one clean row alongside everyone
+      else's. At this point it's just one row in a huge pile — nothing marks it as suspicious yet.</p>
+    </div>
+  </div>
+
+  <!-- Stage 3 -->
+  <div class="box">
+    <h3>Stage 3 — Cluster (folder: <code>cluster/</code>)</h3>
+    <p>One person often uses <b>many different wallet addresses</b>. This stage groups scattered
+    addresses back into the real entity that controls them, using two clues:</p>
+    <ul>
+      <li><b>Clue 1 — spent together:</b> if 4 addresses pay one bill together in one transaction,
+      one person owns all 4 (like paying a restaurant bill using notes from 4 different pockets
+      of the same coat).</li>
+      <li><b>Clue 2 — the "change":</b> if you pay ₹40 with a ₹100 note, you get ₹60 back — that's
+      still your money, just at a new address. We detect which output is "change" vs a real payment.</li>
+    </ul>
+    <div class="box red">
+      <h3>The one trap we had to avoid — <span class="term">CoinJoin — when many strangers deliberately
+      combine their payments into one transaction to confuse investigators, like 50 people all
+      dropping identical ₹500 notes into one hat</span></h3>
+      <p>If we blindly applied Clue 1 to a CoinJoin, we'd wrongly merge innocent strangers into our
+      suspect's group. So we detect and skip these first. Result: <b>100% detection, 0 false alarms.</b></p>
+    </div>
+    <p><b>Result: 6 out of 8 checks pass.</b> The 2 remaining are a known, honest trade-off between
+    being extra careful (fewer false groupings) vs finding more connections — explained more in
+    section 4.</p>
+
+    <div class="story">
+      <h4>Our case, at this stage</h4>
+      <p>After collecting the ransom, E-0066 doesn't just sit on it — the wallet quietly makes several
+      more payments over the next few days, each from a slightly different address. Clue 1 catches
+      some of these because a few payments spend from more than one address together. But most of
+      E-0066's laundering happens through single-input hops, which Clue 1 and Clue 2 alone can't fully
+      connect — this is exactly why we need Stage 4 next.</p>
+    </div>
+  </div>
+
+  <!-- Stage 4 -->
+  <div class="box">
+    <h3>Stage 4 — Graph (folder: <code>graph/</code>)</h3>
+    <p>Money launderers often "peel" money — send a big pile of Bitcoin through 20-30 tiny hops,
+    shaving off a small slice each time, to look boring and avoid detection.
+    (Real-life name: <span class="term">salami slicing — stealing a little bit at a time so no single
+    slice looks suspicious</span>.)</p>
+    <p>Clustering (Stage 3) can't see these chains — each hop looks unrelated on its own. So we
+    built a second detector that follows the money <b>as a path</b>, hop by hop.</p>
+    <div class="stats">
+      <div class="stat"><b>0/10 → 6/10</b><span>criminals we could properly track</span></div>
+      <div class="stat"><b>84.5%</b><span>of planted chain-hops recovered</span></div>
+      <div class="stat"><b>9/9</b><span>checks passing</span></div>
+    </div>
+    <p class="dim small">Before this stage, a criminal who made 31 payments looked like 30 separate,
+    unrelated people. After it, they correctly show up as one entity with 20 connected payments —
+    which is what finally makes it possible to build a strong case against them in Stage 5.</p>
+
+    <div class="story">
+      <h4>Our case, at this stage</h4>
+      <p>Now we follow the hospital's 2 BTC as it "peels" — a small slice goes to a fake shop
+      (cashed out), the rest carries forward to a brand-new address, over and over. Stage 4 walks this
+      exact path, hop by hop, and stitches all 20+ of E-0066's scattered hops back into one single
+      trail. Before this stage, our system thought it was watching 20 different strangers. Now it
+      knows it's one entity — the same criminal, moving the same ransom money.</p>
+    </div>
+  </div>
+
+  <!-- Stage 5 -->
+  <div class="box green">
+    <h3>Stage 5 — Fusion ⭐ (folder: <code>fusion/</code>) — this is our main idea</h3>
+    <p>This is the heart of the whole project — matching a wallet (Stage 3+4's output) to the real
+    IP address that broadcast its payments.</p>
+    <ol>
+      <li>For each payment, we look at every "sensor" (listening computer) that heard it, and note
+      who heard it <b>first</b>.</li>
+      <li>If the same IP address is consistently the "first to hear" a suspect's payments — again
+      and again, many times — that is not a coincidence.</li>
+      <li>We calculate exactly <b>how unlikely</b> that coincidence would be by chance
+      (a <span class="term">p-value — a number from statistics that says "how surprising would this
+      pattern be if it happened purely by chance?" — the smaller the number, the less likely it's a
+      coincidence</span>), and only call it a real lead if it's extremely unlikely to be random.</li>
+    </ol>
+    <div class="box yellow">
+      <h3>The mistake we caught ourselves — and fixed</h3>
+      <p>Our first version found 176 "confident" leads. To test it honestly, we scrambled all the
+      wallet-to-person answers randomly (so there should be <b>zero</b> real patterns left) and ran
+      it again. It still found <b>41 fake "confident" leads</b> — proof our math was wrong,
+      because we were testing hundreds of guesses at once and some pass purely by luck (like
+      flipping 100 coins — a few will land on 10 heads in a row by pure chance).</p>
+      <p>We fixed the statistics (called a <span class="term">Bonferroni correction — a way of being
+      extra strict when you're making hundreds of guesses at once, so lucky coincidences don't get
+      mistaken for real patterns</span>) — and the scrambled test now correctly finds
+      <b>zero</b> fake leads, while our real leads stayed just as strong.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>99.3%</b><span>correct at guess #1</span></div>
+      <div class="stat"><b>140</b><span>confident leads found</span></div>
+      <div class="stat"><b>0</b><span>fake leads on scrambled test</span></div>
+      <div class="stat"><b>8/8</b><span>checks passing</span></div>
+    </div>
+
+    <div class="story">
+      <h4>Our case, at this stage — the payoff</h4>
+      <p>Every one of E-0066's 20+ payments briefly touched the internet before reaching the ledger,
+      and our sensors recorded who "heard" each one first. This stage adds it all up: <b>one specific
+      IP address was first to hear 30 of E-0066's 37 payments</b>. For that to happen purely by
+      chance would need a coincidence with roughly <b>54 zeros after the decimal point</b> in its
+      probability — in plain terms, essentially impossible unless that IP really is where the
+      payments came from. This is the moment a wallet address stops being anonymous and becomes an
+      internet address a real investigator could act on.</p>
+    </div>
+  </div>
+
+  <!-- Stage 6 -->
+  <div class="box">
+    <h3>Stage 6 — AI Models (folder: <code>models/</code>)</h3>
+    <p>We built two AI models that work together:</p>
+    <div class="two">
+      <div class="box blue">
+        <h4>Model A — RandomForest</h4>
+        <p class="small">A supervised model — we show it examples of known criminals and known
+        innocent people, and it learns the pattern. Good at catching known crime types.</p>
+      </div>
+      <div class="box blue">
+        <h4>Model B — IsolationForest</h4>
+        <p class="small">An unsupervised model — nobody tells it what's "criminal". It just flags
+        anyone who behaves very differently from everyone else. Good at catching brand-new,
+        never-seen-before crime patterns.</p>
+      </div>
+    </div>
+    <div class="box yellow">
+      <h3>How we know the AI isn't cheating (memorizing instead of learning)</h3>
+      <p>We scrambled the "criminal / not criminal" labels randomly and re-tested. A model that's
+      just memorizing would still score well on scrambled data. Ours dropped from
+      <b>94% accuracy to 1.6%</b> — proof it's genuinely learning real behaviour, not memorizing.</p>
+    </div>
+    <p><b>Explainability (SHAP):</b> every flagged entity comes with the top reasons, e.g.
+    <em>"flagged because: sends money too often (34%), payment chain matches a peeling pattern (11%),
+    active at unusual hours (9%)"</em> — a real officer can check this reasoning instead of trusting
+    a black box.</p>
+    <div class="stats">
+      <div class="stat"><b>95.8%</b><span>precision (cross-checked)</span></div>
+      <div class="stat"><b>92.0%</b><span>recall</span></div>
+      <div class="stat"><b>9/9</b><span>checks passing</span></div>
+    </div>
+
+    <div class="story">
+      <h4>Our case, at this stage — the ending</h4>
+      <p>By this point, E-0066 has a risk score close to <b>1.00 (maximum)</b>. Model A recognises
+      the pattern as matching known ransomware behaviour. Model B flags it independently for simply
+      not looking like anything normal in the whole dataset. And SHAP prints the exact reasons: heavy
+      transaction activity, a chain-shaped peeling pattern, and unusual timing. An investigator opening
+      this case doesn't see a mysterious "0.98" — they see: <em>"flagged because of X, Y, Z, and here
+      is the IP address, with this much confidence."</em> That's the entire pipeline, start to finish,
+      on one made-up hospital ransom case.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="status">
+  <p class="num">4 — STATUS</p>
+  <h2>What's done vs what's left</h2>
+
+  <div class="tblbox">
+    <table>
+      <tr><th>Part</th><th>Status</th><th>Notes</th></tr>
+      <tr><td>Generator (fake data)</td><td>✅ Done</td><td>12/12 checks</td></tr>
+      <tr><td>Ingest (Rust reader)</td><td>✅ Done</td><td>11/11 checks</td></tr>
+      <tr><td>Clustering</td><td>✅ Done</td><td>6/8 — known trade-off, explained below</td></tr>
+      <tr><td>Graph / chain-finder</td><td>✅ Done</td><td>9/9 checks</td></tr>
+      <tr><td>Fusion (our core idea)</td><td>✅ Done</td><td>8/8 checks</td></tr>
+      <tr><td>AI models + explainability</td><td>✅ Done</td><td>9/9 checks</td></tr>
+      <tr><td><b>Dashboard</b></td><td>🔨 Building now</td><td>The only remaining PS-required piece</td></tr>
+      <tr><td>Technical write-up</td><td>📝 Not started</td><td>Required alongside the dashboard</td></tr>
+    </table>
+  </div>
+
+  <div class="box yellow">
+    <h3>The one honest trade-off (clustering)</h3>
+    <p>Being extra careful about grouping wallets correctly (99% precise — almost never wrongly
+    merges two different people) costs us some completeness (only 15% of possible connections
+    found). We chose "careful but incomplete" over "complete but sometimes wrong", because a wrongly
+    accused innocent person is a much worse outcome than a missed connection.</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="usage">
+  <p class="num">5 — HOW TO ACTUALLY RUN IT</p>
+  <h2>Running the whole pipeline, one command at a time</h2>
+  <p class="dim">This is the order every stage runs in. Each one reads what the previous one wrote.</p>
+
+  <div class="tblbox">
+    <table>
+      <tr><th>#</th><th>Command</th><th>What it does</th></tr>
+      <tr><td>1</td><td><code>python generator/generate.py --out data</code></td><td>Creates the fake dataset</td></tr>
+      <tr><td>2</td><td><code>strata-ingest data/*.json --geoip data/geoip --out store</code></td><td>Reads it into fast storage</td></tr>
+      <tr><td>3</td><td><code>python cluster/run.py --store store</code></td><td>Groups wallets into people</td></tr>
+      <tr><td>4</td><td><code>python graph/run.py --store store</code></td><td>Finds laundering chains</td></tr>
+      <tr><td>5</td><td><code>python fusion/run.py --store store</code></td><td>Matches wallets to IP addresses</td></tr>
+      <tr><td>6</td><td><code>python models/run.py --store store --data data</code></td><td>Scores risk + explains why</td></tr>
+    </table>
+  </div>
+
+  <p>After all six, every result is sitting in the <code>store/</code> folder as fast, ready-to-read
+  files. <b>The dashboard we're building now simply reads this folder and displays it</b> — it does
+  not need to redo any of the above work.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="demo">
+  <p class="num">6 — HOW WE WILL DEMO IT</p>
+  <h2>What the judges will actually see</h2>
+  <ol>
+    <li><b>Switch off the WiFi, visibly, in front of the judges.</b> This one action proves our
+    whole "works fully offline" claim without saying a word.</li>
+    <li><b>Run all six stages</b> in front of them (or show it pre-run, since it takes a couple of
+    minutes).</li>
+    <li><b>Open the dashboard.</b> Show the ranked list — most suspicious entity at the top, with a
+    confidence score.</li>
+    <li><b>Click on the top entity.</b> Show the connected wallets (Stage 3+4), then the matched IP
+    address with its confidence (Stage 5), then the AI's reasons (Stage 6).</li>
+    <li><b>Say the honest version, always:</b> "This is a <em>lead</em>, not proof — with a confidence
+    score and clear reasons, exactly like the problem statement asked for."</li>
+  </ol>
+
+  <div class="box green">
+    <h3>The 30-second summary to memorize</h3>
+    <p>"Bitcoin shows the money but hides the person. The internet briefly shows the person but
+    not the money. Everyone else only looks at the money. We look at both — and we do it with the
+    internet switched off."</p>
+  </div>
+</section>
+
+<footer>
+  <p>Full end-to-end explanation of the STRATA project — SIH Problem Statement 26146, NTRO</p>
+  <span class="name">Team STRATA</span>
+</footer>
+
+</div>
