@@ -223,6 +223,57 @@ h2.center{text-align:center; margin:0 auto; max-width:22ch}
 .panel .fac .vl{font-family:var(--mono); font-size:.68rem; color:var(--ink-3); min-width:38px;
   text-align:right}
 
+
+/* ---------- journey ---------- */
+.track{position:relative; height:420vh; margin-top:44px}
+.sticky{position:sticky; top:0; height:100svh; display:flex; align-items:center}
+.panel-j{
+  position:relative; width:100%; border:1px solid var(--line-2); border-radius:22px;
+  background:radial-gradient(900px 420px at 50% 0%, rgba(224,162,74,.055), transparent 62%), #060505;
+  padding:26px 30px 22px; overflow:hidden;
+}
+.panel-j .hdr{
+  display:flex; justify-content:space-between; font-family:var(--mono);
+  font-size:.7rem; letter-spacing:.16em; color:var(--ink-3); text-transform:uppercase;
+}
+.panel-j .hdr b{color:var(--amber); font-weight:500}
+.panel-j canvas{width:100%; height:min(52vh,430px); display:block; margin-top:6px}
+
+.jcard{
+  position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+  width:min(430px, 74%); border-radius:16px; padding:20px 24px;
+  background:rgba(8,7,6,.93); border:1px solid rgba(224,162,74,.34);
+  box-shadow:0 24px 70px rgba(0,0,0,.75); backdrop-filter:blur(8px);
+  text-align:center; pointer-events:none;
+  transition:opacity .34s ease, transform .34s cubic-bezier(.2,.7,.2,1);
+}
+.jcard h4{font-family:var(--serif); font-size:1.34rem; font-weight:400; letter-spacing:-.01em}
+.jcard .meta{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); margin-top:9px;
+}
+.jcard .pill{
+  display:inline-flex; align-items:center; gap:7px; margin-top:14px;
+  padding:6px 15px; border-radius:100px; border:1px solid rgba(224,162,74,.42);
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; color:var(--amber);
+}
+.jcard .pill i{width:5px; height:5px; border-radius:50%; background:var(--amber);
+  animation:pulse 1.6s infinite; display:block}
+.jcard .body{font-size:.9rem; color:var(--ink-2); margin-top:13px; line-height:1.6}
+
+.panel-j .foot{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  border-top:1px solid var(--line); padding-top:16px; margin-top:4px;
+}
+.panel-j .foot .big{font-family:var(--serif); font-size:2rem; color:var(--amber); line-height:1}
+.panel-j .foot .lab{font-family:var(--mono); font-size:.68rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); margin-left:9px}
+.panel-j .foot .right{font-family:var(--mono); font-size:.68rem; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-3); display:flex; align-items:center; gap:8px}
+.panel-j .foot .right i{width:5px; height:5px; border-radius:50%; background:var(--amber);
+  animation:pulse 2s infinite; display:block}
+@media(max-width:760px){ .track{height:340vh} .jcard{width:86%} }
+
 /* ---------- footer ---------- */
 footer{padding:80px 0 60px; border-top:1px solid var(--line); color:var(--ink-3); font-size:.87rem}
 .foot{display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:flex-end}
@@ -399,6 +450,29 @@ footer .mark b{color:var(--amber); font-weight:400}
       Every stage ships with its own test suite scored against ground truth. A stage that cannot
       be measured is a stage nobody should trust.
     </p>
+
+
+    <div class="track" id="track">
+      <div class="sticky">
+        <div class="panel-j">
+          <div class="hdr"><span>Six stages &middot; <b id="j-stage">01 / 06</b></span>
+            <span>Ledger &rarr; attributed lead</span></div>
+          <canvas id="journey" width="1900" height="820"></canvas>
+
+          <div class="jcard" id="jcard">
+            <h4 id="j-title">Generator</h4>
+            <div class="meta" id="j-meta">PYTHON &middot; 12 / 12 CHECKS</div>
+            <p class="body" id="j-body">The problem statement supplies a field list, not data.</p>
+            <span class="pill"><i></i><span id="j-pill">GROUND TRUTH HELD</span></span>
+          </div>
+
+          <div class="foot">
+            <div><span class="big" id="j-count">0</span><span class="lab">checks passed</span></div>
+            <div class="right"><i></i><span id="j-status">Pipeline verified end to end</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="steps">
       <div class="step rv">
@@ -839,6 +913,163 @@ function onScreen(canvas, draw) {
     x.fillText('BALANCE CARRIED FORWARD', W / 2, y - 62);
     x.fillText('SLICE PEELED OFF AT EVERY HOP', W / 2, y + 152);
   });
+})();
+
+
+// ---- scroll-scrubbed pipeline journey ------------------------------------
+// The section is taller than the viewport and the panel sticks, so scrolling
+// through it scrubs the animation rather than merely triggering it. The reader
+// controls the pace, which suits a six-stage process better than a loop they
+// have to wait out.
+(() => {
+  const track = document.getElementById('track');
+  const canvas = document.getElementById('journey');
+  if (!track || !canvas) return;
+
+  const x = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const STAGES = [
+    { name: 'Generator',  meta: 'PYTHON · 12 / 12 CHECKS',  pill: 'GROUND TRUTH HELD',
+      body: 'No data is supplied, only a field list. Building the dataset means we also hold the answers, and can measure detection instead of asserting it.', checks: 12 },
+    { name: 'Ingest',     meta: 'RUST · 11 / 11 CHECKS',    pill: '40,000 RECORDS / SEC',
+      body: 'CSV, JSON and XML into one shape. Fed corrupted evidence it rejects and reports, because a forensic tool must not fall over on a malformed row.', checks: 23 },
+    { name: 'Clustering', meta: 'COINJOIN FILTER FIRST',    pill: '100% COINJOIN RECALL',
+      body: 'Addresses spent together are one entity. CoinJoins are filtered first — they are strangers signing together, and merging them is silent.', checks: 29 },
+    { name: 'Graph',      meta: '9 / 9 CHECKS',             pill: '0 → 6 OF 10 ACTORS',
+      body: 'Peeling chains recovered as paths. Clustering cannot see them: every hop has a single input, so nothing is spent together to link.', checks: 38 },
+    { name: 'Fusion',     meta: '8 / 8 CHECKS · THE CONTRIBUTION', pill: '139 OF 140 CORRECT',
+      body: 'Network sightings joined to ledger entities, each candidate host tested against the network-wide baseline and corrected for multiple comparisons.', checks: 46 },
+    { name: 'Detection',  meta: '9 / 9 CHECKS',             pill: 'EVERY SCORE EXPLAINED',
+      body: 'A supervised model for known patterns, an unsupervised one for anything new, and SHAP decomposing every score into the factors that produced it.', checks: 55 },
+  ];
+
+  const el = {
+    stage: document.getElementById('j-stage'),
+    title: document.getElementById('j-title'),
+    meta:  document.getElementById('j-meta'),
+    body:  document.getElementById('j-body'),
+    pill:  document.getElementById('j-pill'),
+    count: document.getElementById('j-count'),
+    card:  document.getElementById('jcard'),
+  };
+
+  // Node positions along a gentle S-curve, so the path reads as a journey
+  // rather than a straight line of boxes.
+  const pad = 150;
+  const nodes = STAGES.map((s, i) => {
+    const t = i / (STAGES.length - 1);
+    return {
+      x: pad + t * (W - pad * 2),
+      y: H * 0.52 + Math.sin(t * Math.PI * 1.85 + 0.4) * H * 0.24,
+      label: s.name,
+    };
+  });
+
+  // Catmull-Rom through the nodes, sampled once — the path never changes, only
+  // how much of it is drawn.
+  const path = [];
+  const pt = (i) => nodes[Math.max(0, Math.min(nodes.length - 1, i))];
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const p0 = pt(i - 1), p1 = pt(i), p2 = pt(i + 1), p3 = pt(i + 2);
+    for (let s = 0; s < 40; s++) {
+      const u = s / 40, u2 = u * u, u3 = u2 * u;
+      path.push({
+        x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * u + (2*p0.x - 5*p1.x + 4*p2.x - p3.x) * u2 + (-p0.x + 3*p1.x - 3*p2.x + p3.x) * u3),
+        y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * u + (2*p0.y - 5*p1.y + 4*p2.y - p3.y) * u2 + (-p0.y + 3*p1.y - 3*p2.y + p3.y) * u3),
+      });
+    }
+  }
+  path.push(nodes[nodes.length - 1]);
+
+  let progress = 0, shown = -1;
+
+  function draw(now) {
+    x.clearRect(0, 0, W, H);
+    const head = Math.floor(progress * (path.length - 1));
+
+    // full route, recessive
+    x.beginPath();
+    path.forEach((p, i) => i ? x.lineTo(p.x, p.y) : x.moveTo(p.x, p.y));
+    x.strokeStyle = '#241f1a'; x.lineWidth = 5; x.lineCap = 'round'; x.stroke();
+
+    // travelled route
+    if (head > 0) {
+      x.beginPath();
+      for (let i = 0; i <= head; i++) i ? x.lineTo(path[i].x, path[i].y) : x.moveTo(path[i].x, path[i].y);
+      const g = x.createLinearGradient(pad, 0, W - pad, 0);
+      g.addColorStop(0, '#7a5520'); g.addColorStop(1, '#e0a24a');
+      x.strokeStyle = g; x.lineWidth = 5; x.stroke();
+    }
+
+    // nodes
+    nodes.forEach((n, i) => {
+      const at = i / (nodes.length - 1);
+      const reached = progress >= at - 0.02;
+      const active = i === Math.round(progress * (nodes.length - 1));
+
+      if (reached) {
+        const pulse = active ? (Math.sin(now / 420) + 1) / 2 : 0;
+        x.beginPath(); x.arc(n.x, n.y, 22 + pulse * 12, 0, 7);
+        x.fillStyle = `rgba(224,162,74,${0.10 + pulse * 0.12})`; x.fill();
+      }
+      x.beginPath(); x.arc(n.x, n.y, 13, 0, 7);
+      x.fillStyle = reached ? '#e0a24a' : '#151210'; x.fill();
+      x.strokeStyle = reached ? '#f0c078' : '#2a2723'; x.lineWidth = 3; x.stroke();
+
+      x.font = '600 24px ui-monospace, SFMono-Regular, Menlo, monospace';
+      x.fillStyle = reached ? 'rgba(242,239,233,.82)' : '#4a443d';
+      x.textAlign = 'center';
+      x.fillText(String(i + 1).padStart(2, '0'), n.x, n.y - 34);
+      x.font = '500 21px ui-monospace, SFMono-Regular, Menlo, monospace';
+      x.fillStyle = reached ? '#8a857e' : '#3a352f';
+      x.fillText(n.label.toUpperCase(), n.x, n.y + 48);
+    });
+
+    // the packet travelling the route
+    if (head > 0 && head < path.length - 1) {
+      const p = path[head];
+      x.beginPath(); x.arc(p.x, p.y, 26, 0, 7);
+      x.fillStyle = 'rgba(224,162,74,.18)'; x.fill();
+      x.beginPath(); x.arc(p.x, p.y, 9, 0, 7); x.fillStyle = '#fff3e0'; x.fill();
+    }
+  }
+
+  function update() {
+    const rect = track.getBoundingClientRect();
+    const span = track.offsetHeight - innerHeight;
+    progress = Math.max(0, Math.min(1, -rect.top / span));
+
+    const idx = Math.min(STAGES.length - 1, Math.round(progress * (STAGES.length - 1)));
+    if (idx !== shown) {
+      shown = idx;
+      const s = STAGES[idx];
+      el.card.style.opacity = '0';
+      el.card.style.transform = 'translate(-50%,-46%)';
+      setTimeout(() => {
+        el.stage.textContent = `${String(idx + 1).padStart(2, '0')} / 06`;
+        el.title.textContent = s.name;
+        el.meta.textContent = s.meta;
+        el.body.textContent = s.body;
+        el.pill.textContent = s.pill;
+        el.count.textContent = s.checks;
+        el.card.style.opacity = '1';
+        el.card.style.transform = 'translate(-50%,-50%)';
+      }, 170);
+    }
+  }
+
+  let raf = null;
+  const tick = (now) => { draw(now); raf = requestAnimationFrame(tick); };
+  const io = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && raf === null) raf = requestAnimationFrame(tick);
+    else if (!e.isIntersecting && raf !== null) { cancelAnimationFrame(raf); raf = null; }
+  }, { threshold: 0 });
+  io.observe(track);
+
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
 })();
 
 </script>
