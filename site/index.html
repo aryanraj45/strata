@@ -180,6 +180,49 @@ h2.center{text-align:center; margin:0 auto; max-width:22ch}
 .ba .bad .val{color:#c9564f}
 .ba .good .val{color:var(--amber)}
 
+
+/* ---------- bento ---------- */
+.bento{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:56px}
+@media(max-width:900px){ .bento{grid-template-columns:1fr} }
+.tile{
+  border:1px solid var(--line-2); border-radius:18px; padding:30px 30px 0;
+  background:linear-gradient(180deg, rgba(255,255,255,.022), transparent 60%);
+  overflow:hidden; display:flex; flex-direction:column;
+  transition:border-color .4s ease;
+}
+.tile:hover{border-color:#3a352f}
+.tile h3{
+  font-family:var(--sans); font-size:1.02rem; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--ink);
+}
+.tile p{font-size:.93rem; color:var(--ink-2); margin-top:12px; max-width:44ch}
+.tile .art{margin-top:26px; flex:1; min-height:270px; position:relative}
+.tile .art canvas{width:100%; height:270px; display:block; border-radius:12px}
+
+/* mock alert panel */
+.panel{
+  border-radius:12px 12px 0 0; border:1px solid var(--line-2); border-bottom:0;
+  background:#0b0a09; padding:18px 20px; margin-top:26px;
+  font-family:var(--sans);
+}
+.panel .bar{display:flex; align-items:center; gap:8px; margin-bottom:16px}
+.panel .bar i{width:9px; height:9px; border-radius:50%; background:#2a2723; display:block}
+.panel .bar span{margin-left:auto; font-family:var(--mono); font-size:.66rem;
+  color:var(--ink-3); letter-spacing:.1em}
+.panel .row{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+.panel .eid{font-family:var(--mono); font-size:.82rem; color:var(--ink)}
+.panel .risk{font-family:var(--serif); font-size:1.5rem; color:var(--amber)}
+.panel .meta{font-size:.76rem; color:var(--ink-3); margin-top:4px}
+.panel .fac{margin-top:16px; display:flex; flex-direction:column; gap:9px}
+.panel .fac .f{display:flex; align-items:center; gap:10px}
+.panel .fac .nm{font-size:.74rem; color:var(--ink-2); min-width:132px}
+.panel .fac .tr{flex:1; height:6px; border-radius:4px; background:#1c1a17; overflow:hidden}
+.panel .fac .fl{height:100%; border-radius:4px; background:var(--amber);
+  width:0; transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.tile.in .panel .fac .fl{width:var(--w)}
+.panel .fac .vl{font-family:var(--mono); font-size:.68rem; color:var(--ink-3); min-width:38px;
+  text-align:right}
+
 /* ---------- footer ---------- */
 footer{padding:80px 0 60px; border-top:1px solid var(--line); color:var(--ink-3); font-size:.87rem}
 .foot{display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:flex-end}
@@ -278,6 +321,72 @@ footer .mark b{color:var(--amber); font-weight:400}
       <div class="stat rv" style="transition-delay:.06s"><div class="n" data-to="140">0</div><div class="k">statistically significant attributions</div></div>
       <div class="stat rv" style="transition-delay:.12s"><div class="n" data-to="0">0</div><div class="k">false leads when the data is shuffled</div></div>
       <div class="stat rv" style="transition-delay:.18s"><div class="n" data-to="65">0</div><div class="k">automated checks across seven stages</div></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="capability">
+  <div class="wrap">
+    <p class="eyebrow rv">What it does</p>
+    <h2 class="rv">Evidence an analyst can act on.</h2>
+    <p class="sub rv">
+      Four things the system produces, each of them measured rather than described.
+    </p>
+
+    <div class="bento">
+
+      <div class="tile rv">
+        <h3>Dual-layer fusion</h3>
+        <p>The ledger and the network share no key except approximate time. Joining them on that
+          is the whole contribution — and it is what turns a wallet address into a host.</p>
+        <div class="art"><canvas id="art-fusion" width="900" height="540"></canvas></div>
+      </div>
+
+      <div class="tile rv" style="transition-delay:.08s">
+        <h3>Origins, resolved</h3>
+        <p>Every attributed host is resolved to a country and network operator from a GeoIP
+          database that ships inside the repository. No lookup leaves the machine.</p>
+        <div class="art"><canvas id="art-globe" width="900" height="540"></canvas></div>
+      </div>
+
+      <div class="tile rv" style="transition-delay:.04s">
+        <h3>Explainable alerts</h3>
+        <p>Never a bare score. Every alert carries the factors that produced it, measured with
+          SHAP, so an analyst can interrogate the reasoning instead of trusting it.</p>
+        <div class="panel">
+          <div class="bar"><i></i><i></i><i></i><span>ALERT · RANK 1</span></div>
+          <div class="row">
+            <div>
+              <div class="eid">E-3rszabwdxxdU</div>
+              <div class="meta">203.0.113.135 · AS64512 · IN · 30 of 37 first-relay</div>
+            </div>
+            <div class="risk">0.98</div>
+          </div>
+          <div class="fac">
+            <div class="f"><span class="nm">peeling chain depth</span>
+              <span class="tr"><span class="fl" style="--w:92%"></span></span>
+              <span class="vl">+0.34</span></div>
+            <div class="f"><span class="nm">IP co-occurrence</span>
+              <span class="tr"><span class="fl" style="--w:76%"></span></span>
+              <span class="vl">+0.28</span></div>
+            <div class="f"><span class="nm">timing entropy</span>
+              <span class="tr"><span class="fl" style="--w:51%"></span></span>
+              <span class="vl">+0.19</span></div>
+            <div class="f"><span class="nm">ASN concentration</span>
+              <span class="tr"><span class="fl" style="--w:27%"></span></span>
+              <span class="vl">+0.10</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile rv" style="transition-delay:.12s">
+        <h3>Peeling chains</h3>
+        <p>A balance shedding a small slice at every hop, carrying the remainder onward. Clustering
+          cannot see these — every hop has one input. Graph traversal recovers them.</p>
+        <div class="art"><canvas id="art-chain" width="900" height="540"></canvas></div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -543,6 +652,195 @@ document.querySelectorAll('.stat .n').forEach(el => counters.observe(el));
     node(sensor, 10, INK, 0);
   }
 })();
+
+// ---- bento visuals -------------------------------------------------------
+// Each canvas animates only while on screen. Four always-running loops would
+// cost battery for artwork nobody is looking at.
+const AMBER = '#e0a24a', DIMLINE = '#312c26', INK = '#f2efe9';
+
+function onScreen(canvas, draw) {
+  let raf = null, t0 = performance.now();
+  const loop = (now) => { draw(now - t0); raf = requestAnimationFrame(loop); };
+  const io = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && raf === null) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+    else if (!e.isIntersecting && raf !== null) { cancelAnimationFrame(raf); raf = null; }
+  }, { threshold: 0.05 });
+  io.observe(canvas);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { io.disconnect(); draw(2600); }
+}
+
+// --- 1. fusion: two streams of fields converging on one mark --------------
+(() => {
+  const c = document.getElementById('art-fusion'); if (!c) return;
+  const x = c.getContext('2d'), W = c.width, H = c.height;
+  const L1 = ['TXID', 'WALLET', 'AMOUNT', 'SCRIPT'];
+  const L2 = ['SRC IP', 'PORT', 'TIMESTAMP', 'ASN'];
+  const cx = W / 2, cy = H / 2;
+
+  function chip(text, px, py, active) {
+    x.font = '600 20px ui-monospace, SFMono-Regular, Menlo, monospace';
+    const w = x.measureText(text).width + 34, h = 42;
+    x.beginPath(); x.roundRect(px - w / 2, py - h / 2, w, h, 21);
+    x.fillStyle = active ? 'rgba(224,162,74,.14)' : 'rgba(255,255,255,.035)';
+    x.fill();
+    x.strokeStyle = active ? 'rgba(224,162,74,.5)' : '#2a2723'; x.lineWidth = 1.5; x.stroke();
+    x.fillStyle = active ? AMBER : '#8a857e'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(text, px, py);
+  }
+
+  onScreen(c, (ms) => {
+    const t = (ms / 3600) % 1;
+    x.clearRect(0, 0, W, H);
+
+    // glow behind the join
+    const g = x.createRadialGradient(cx, cy, 0, cx, cy, 190);
+    g.addColorStop(0, 'rgba(224,162,74,.16)'); g.addColorStop(1, 'transparent');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+
+    L1.forEach((label, i) => {
+      const py = 92 + i * 90, px = 150;
+      const phase = Math.max(0, Math.min(1, (t - i * 0.07) / 0.3));
+      x.strokeStyle = DIMLINE; x.lineWidth = 1.5;
+      x.beginPath(); x.moveTo(px + 70, py); x.lineTo(cx - 46, cy); x.stroke();
+      if (phase > 0 && phase < 1) {
+        x.fillStyle = AMBER; x.beginPath();
+        x.arc(px + 70 + (cx - 46 - px - 70) * phase, py + (cy - py) * phase, 4, 0, 7); x.fill();
+      }
+      chip(label, px, py, phase > 0 && phase < 1);
+    });
+
+    L2.forEach((label, i) => {
+      const py = 92 + i * 90, px = W - 150;
+      const phase = Math.max(0, Math.min(1, (t - 0.1 - i * 0.07) / 0.3));
+      x.strokeStyle = DIMLINE; x.lineWidth = 1.5;
+      x.beginPath(); x.moveTo(px - 78, py); x.lineTo(cx + 46, cy); x.stroke();
+      if (phase > 0 && phase < 1) {
+        x.fillStyle = AMBER; x.beginPath();
+        x.arc(px - 78 + (cx + 46 - px + 78) * phase, py + (cy - py) * phase, 4, 0, 7); x.fill();
+      }
+      chip(label, px, py, phase > 0 && phase < 1);
+    });
+
+    // the join
+    const pulse = 1 + Math.sin(t * Math.PI * 2) * 0.06;
+    x.beginPath(); x.roundRect(cx - 42 * pulse, cy - 42 * pulse, 84 * pulse, 84 * pulse, 20);
+    x.fillStyle = '#0d0c0a'; x.fill();
+    x.strokeStyle = AMBER; x.lineWidth = 2; x.stroke();
+    x.fillStyle = AMBER; x.font = '600 34px ui-serif, Georgia, serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('⨯', cx, cy + 2);
+  });
+})();
+
+// --- 2. globe: dot sphere with our actual attributed countries ------------
+(() => {
+  const c = document.getElementById('art-globe'); if (!c) return;
+  const x = c.getContext('2d'), W = c.width, H = c.height;
+  const cx = W / 2, cy = H / 2 + 10, R = 225;
+
+  // Fibonacci sphere — even coverage without clumping at the poles.
+  const dots = [];
+  const N = 1100;
+  for (let i = 0; i < N; i++) {
+    const phi = Math.acos(1 - 2 * (i + 0.5) / N);
+    const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+    dots.push([Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta)]);
+  }
+
+  // The countries the pipeline actually attributed traffic to.
+  const sites = [
+    ['IN', 22, 79], ['US', 39, -98], ['SG', 1.3, 103], ['DE', 51, 10],
+    ['NL', 52, 5], ['AE', 24, 54], ['RU', 60, 90], ['PA', 9, -80], ['SC', -4.6, 55],
+  ].map(([code, lat, lon]) => {
+    const a = lat * Math.PI / 180, b = lon * Math.PI / 180;
+    return { code, v: [Math.cos(a) * Math.cos(b), Math.sin(a), Math.cos(a) * Math.sin(b)] };
+  });
+
+  const rot = (v, ang) => {
+    const s = Math.sin(ang), co = Math.cos(ang);
+    return [v[0] * co - v[2] * s, v[1], v[0] * s + v[2] * co];
+  };
+
+  onScreen(c, (ms) => {
+    const ang = ms / 9000;
+    x.clearRect(0, 0, W, H);
+
+    const g = x.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.5);
+    g.addColorStop(0, 'rgba(224,162,74,.13)'); g.addColorStop(1, 'transparent');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+
+    for (const d of dots) {
+      const [px, py, pz] = rot(d, ang);
+      if (pz < -0.15) continue;                       // hide the far side
+      const depth = (pz + 1) / 2;
+      x.beginPath();
+      x.arc(cx + px * R, cy - py * R, 1.6 + depth * 1.1, 0, 7);
+      x.fillStyle = `rgba(180,170,158,${0.10 + depth * 0.34})`;
+      x.fill();
+    }
+
+    for (const s of sites) {
+      const [px, py, pz] = rot(s.v, ang);
+      if (pz < 0) continue;
+      const sx = cx + px * R, sy = cy - py * R;
+      const pulse = (Math.sin(ms / 700 + s.code.charCodeAt(0)) + 1) / 2;
+      x.beginPath(); x.arc(sx, sy, 5 + pulse * 5, 0, 7);
+      x.fillStyle = `rgba(224,162,74,${0.16 + pulse * 0.14})`; x.fill();
+      x.beginPath(); x.arc(sx, sy, 4.5, 0, 7); x.fillStyle = AMBER; x.fill();
+      x.font = '600 19px ui-monospace, SFMono-Regular, Menlo, monospace';
+      x.fillStyle = 'rgba(242,239,233,.72)'; x.textAlign = 'center';
+      x.fillText(s.code, sx, sy - 15);
+    }
+  });
+})();
+
+// --- 3. peeling chain: a balance shedding a slice at every hop ------------
+(() => {
+  const c = document.getElementById('art-chain'); if (!c) return;
+  const x = c.getContext('2d'), W = c.width, H = c.height;
+  const HOPS = 7, y = H / 2 - 30, gap = (W - 150) / (HOPS - 1);
+
+  onScreen(c, (ms) => {
+    const t = (ms / 5200) % 1;
+    x.clearRect(0, 0, W, H);
+    const head = t * (HOPS + 1);
+
+    for (let i = 0; i < HOPS; i++) {
+      const px = 75 + i * gap;
+      const reached = head > i;
+      const r = 26 - i * 1.9;                        // the balance decays
+
+      if (i < HOPS - 1) {
+        x.strokeStyle = DIMLINE; x.lineWidth = 2;
+        x.beginPath(); x.moveTo(px + r + 6, y); x.lineTo(px + gap - r + 4, y); x.stroke();
+        const seg = Math.max(0, Math.min(1, head - i));
+        if (seg > 0) {
+          x.strokeStyle = `rgba(224,162,74,${0.85 - i * 0.09})`;
+          x.beginPath(); x.moveTo(px + r + 6, y);
+          x.lineTo(px + r + 6 + (gap - r * 2 - 2) * seg, y); x.stroke();
+        }
+      }
+
+      // the peel dropping away
+      if (reached) {
+        const drop = Math.min(1, head - i);
+        x.strokeStyle = `rgba(138,132,124,${0.5 * (1 - drop * 0.4)})`; x.lineWidth = 1.5;
+        x.beginPath(); x.moveTo(px, y + r); x.lineTo(px, y + r + 62 * drop); x.stroke();
+        x.beginPath(); x.arc(px, y + r + 62 * drop, 6, 0, 7);
+        x.fillStyle = `rgba(138,132,124,${0.75 * drop})`; x.fill();
+      }
+
+      x.beginPath(); x.arc(px, y, r, 0, 7);
+      x.fillStyle = reached ? 'rgba(224,162,74,.18)' : 'rgba(255,255,255,.03)'; x.fill();
+      x.strokeStyle = reached ? AMBER : '#2a2723'; x.lineWidth = 2; x.stroke();
+    }
+
+    x.font = '500 21px ui-monospace, SFMono-Regular, Menlo, monospace';
+    x.fillStyle = '#6b655e'; x.textAlign = 'center';
+    x.fillText('BALANCE CARRIED FORWARD', W / 2, y - 62);
+    x.fillText('SLICE PEELED OFF AT EVERY HOP', W / 2, y + 152);
+  });
+})();
+
 </script>
 </body>
 </html>
