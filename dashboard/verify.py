@@ -61,20 +61,25 @@ def main() -> int:
         _report()
         return 1
 
-    # 2 - the headline figures come from the store, not from the dashboard
-    metric_values = {m.label: m.value for m in app.metric}
+    # 2 - the headline figures come from the store, not from the dashboard.
+    #
+    # The hero cards are rendered as HTML rather than st.metric, so this reads
+    # the markdown the app actually emitted and looks for the store's values in
+    # it. A dashboard that recomputes its own numbers is a second, unverified
+    # implementation, and the drift shows up exactly when it matters.
+    emitted = " ".join(block.value for block in app.markdown)
     expected = {
-        "Transactions": f"{totals['transactions']:,}",
-        "Entities": f"{totals['entities']:,}",
-        "High risk": f"{totals['high_risk']:,}",
-        "Origin attributed": f"{totals['attributed']:,}",
+        "entities scored": f"{totals['scored']:,}",
+        "high risk": f"{totals['high_risk']:,}",
+        "origins attributed": f"{totals['attributed']:,}",
+        "wallet addresses": f"{totals['addresses']:,}",
     }
-    wrong = {k: (metric_values.get(k), v) for k, v in expected.items() if metric_values.get(k) != v}
+    absent = {k: v for k, v in expected.items() if v not in emitted}
     check(
         "headline figures match the store",
-        not wrong,
-        f"{len(expected)} metrics checked against DuckDB"
-        + (f"; mismatched {wrong}" if wrong else ""),
+        not absent,
+        f"{len(expected)} figures checked against DuckDB"
+        + (f"; not found on the page: {absent}" if absent else ""),
     )
 
     # 3 - the alert queue is ranked, since an unordered queue is not a queue
