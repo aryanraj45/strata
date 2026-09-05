@@ -27,5 +27,6 @@ images.tar
 # rust build artifacts
 ingest/target/
 
-# generated store
-store/
+# generated store — parquet files are committed for cloud deployment
+store/*
+!store/*.parquet
