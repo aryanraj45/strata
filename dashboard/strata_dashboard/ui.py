@@ -15,32 +15,38 @@ from __future__ import annotations
 import altair as alt
 import streamlit as st
 
-# Surfaces
-BG = "#0a0d12"
-SURFACE = "#12161d"
-LINE = "#1e2530"
+# The landing page's tokens, verbatim. The explorer is the same product, so it
+# is the same palette: black, one amber, cream ink. No second accent hue.
+BG = "#000000"
+SURFACE = "#0b0a09"
+LINE = "#1c1a17"
+LINE_2 = "#2a2723"
 
 # Ink
-INK = "#e6ebf2"
-INK_DIM = "#8b98a9"
-INK_FAINT = "#5d6a7b"
+INK = "#f2efe9"
+INK_DIM = "#a9a29a"
+INK_FAINT = "#6b655e"
 
-# Accent — identity, not state
-ACCENT = "#2ee6a8"
+# Accent -- identity, not state
+ACCENT = "#e0a24a"
+AMBER_DIM = "#8a6428"
 
 # Reserved status colours. Never reused as categorical series.
-CRITICAL = "#f2686f"
-SERIOUS = "#f0883c"
-WARNING = "#f0c73c"
-GOOD = "#2ee6a8"
-NEUTRAL = "#5eb3e4"
+CRITICAL = "#c9564f"
+SERIOUS = "#d98b3f"
+WARNING = "#c9a227"
+GOOD = "#7f9c6b"
+NEUTRAL = "#6b655e"
 
 # Node identity in the link graph
-ENTITY_HUE = "#2ee6a8"
-IP_HUE = "#f0a83c"
-ASN_HUE = "#a48bf0"
+ENTITY_HUE = "#e0a24a"
+IP_HUE = "#c9564f"
+ASN_HUE = "#8a7f6d"
 
-SEQUENTIAL = ["#0f3a30", "#166b56", "#1e9c7c", "#2ecfa2", "#7cf0cb"]
+SERIF = 'ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif'
+MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace'
+
+SEQUENTIAL = ["#3a2a12", "#6b4a1c", "#a06f28", "#d09a3e", "#f0cd8a"]
 
 
 def risk_colour(score: float) -> str:
@@ -104,41 +110,126 @@ def inject_css() -> None:
     st.markdown(
         f"""
         <style>
-          .block-container {{padding-top: 2rem; padding-bottom: 4rem; max-width: 1500px;}}
-          [data-testid="stSidebarNav"] {{padding-top: 0.5rem;}}
+          /* ---- the page itself, on the landing page's terms ---- */
+          .stApp, [data-testid="stAppViewContainer"] {{background:{BG};}}
+          [data-testid="stHeader"] {{background:transparent;}}
+          .block-container {{padding-top: 2.2rem; padding-bottom: 5rem; max-width: 1500px;}}
 
-          .hero {{
-            display:flex; flex-direction:column; gap:4px;
-            padding: 18px 22px; border-radius: 10px;
-            background: linear-gradient(135deg, {SURFACE} 0%, #0e1319 100%);
-            border: 1px solid {LINE}; border-left: 3px solid {ACCENT};
+          /* Headings in the serif, same as the landing page. Streamlit ships a
+             sans for everything, which is what made this read as a template. */
+          h1, h2, h3 {{
+            font-family:{SERIF} !important; font-weight:400 !important;
+            letter-spacing:-.015em; color:{INK};
           }}
-          .hero .k {{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
-                     color:{INK_FAINT};}}
-          .hero .v {{font-size:2rem; font-weight:700; line-height:1.1; color:{INK};
-                     font-variant-numeric: tabular-nums;}}
+          h1 {{font-size:2.5rem !important;}}
+          h2 {{font-size:1.9rem !important;}}
+          h3 {{font-size:1.45rem !important;}}
+
+          [data-testid="stSidebar"] {{background:#050505; border-right:1px solid {LINE};}}
+          [data-testid="stSidebarNav"] {{padding-top:.5rem;}}
+
+          /* ---- everything arrives, rather than appearing ---- */
+          @keyframes rise {{from {{opacity:0; transform:translateY(14px);}}
+                            to   {{opacity:1; transform:none;}}}}
+          .block-container [data-testid="stVerticalBlock"] > div {{
+            animation: rise .55s cubic-bezier(.2,.7,.2,1) both;
+          }}
+          @media (prefers-reduced-motion: reduce) {{
+            .block-container [data-testid="stVerticalBlock"] > div {{animation:none;}}
+          }}
+
+          /* ---- stat cards ---- */
+          .hero {{
+            display:flex; flex-direction:column; gap:5px;
+            padding: 20px 22px; border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,.022), transparent);
+            border: 1px solid {LINE_2}; border-left: 2px solid {ACCENT};
+            transition: border-color .3s, transform .3s;
+          }}
+          .hero:hover {{border-color:{AMBER_DIM}; transform:translateY(-2px);}}
+          .hero .k {{font-family:{MONO}; font-size:.68rem; letter-spacing:.13em;
+                     text-transform:uppercase; color:{INK_FAINT};}}
+          .hero .v {{font-family:{SERIF}; font-size:2.4rem; font-weight:400;
+                     line-height:1.05; color:{INK}; font-variant-numeric: tabular-nums;}}
           .hero .s {{font-size:.82rem; color:{INK_DIM};}}
 
           .pill {{display:inline-block; padding:2px 10px; border-radius:100px;
-                  font-size:.72rem; font-weight:600; letter-spacing:.03em;}}
+                  font-family:{MONO}; font-size:.68rem; letter-spacing:.06em;}}
 
-          .factor-row {{display:flex; align-items:center; gap:12px; margin:6px 0;}}
-          .factor-name {{min-width:200px; font-size:.85rem; color:{INK};}}
-          .factor-track {{flex:1; height:8px; border-radius:5px; background:{LINE};
+          .factor-row {{display:flex; align-items:center; gap:12px; margin:7px 0;}}
+          .factor-name {{min-width:210px; font-size:.85rem; color:{INK_DIM};}}
+          .factor-track {{flex:1; height:7px; border-radius:5px; background:#181614;
                           overflow:hidden;}}
-          .factor-fill {{height:100%; border-radius:5px; background:{ACCENT};}}
-          .factor-val {{font-size:.78rem; color:{INK_DIM}; min-width:56px;
-                        text-align:right; font-variant-numeric:tabular-nums;}}
+          .factor-fill {{height:100%; border-radius:5px;
+                         background:linear-gradient(90deg,{AMBER_DIM},{ACCENT});}}
+          .factor-val {{font-family:{MONO}; font-size:.76rem; color:{INK}; min-width:58px;
+                        text-align:right;}}
 
-          .evidence {{border-left:3px solid {ACCENT}; background:#0c1a16;
-                      padding:12px 16px; border-radius:0 6px 6px 0; margin:10px 0;
+          .evidence {{border-left:2px solid {ACCENT}; background:rgba(224,162,74,.05);
+                      padding:13px 17px; border-radius:0 8px 8px 0; margin:10px 0;
                       font-size:.9rem;}}
-          .caution {{border-left:3px solid {WARNING}; background:#1a1608;
-                     padding:12px 16px; border-radius:0 6px 6px 0; margin:10px 0;
+          .caution {{border-left:2px solid {WARNING}; background:rgba(201,162,39,.05);
+                     padding:13px 17px; border-radius:0 8px 8px 0; margin:10px 0;
                      font-size:.9rem;}}
           .muted {{color:{INK_DIM}; font-size:.85rem;}}
 
-          .stDataFrame {{border:1px solid {LINE}; border-radius:8px;}}
+          .stDataFrame, [data-testid="stDataFrame"] {{
+            border:1px solid {LINE}; border-radius:10px;
+          }}
+          [data-testid="stMetricValue"] {{
+            font-family:{SERIF} !important; font-weight:400 !important; color:{INK};
+          }}
+          [data-testid="stMetricLabel"] {{
+            font-family:{MONO} !important; font-size:.68rem !important;
+            letter-spacing:.13em; text-transform:uppercase; color:{INK_FAINT} !important;
+          }}
+          div[role="radiogroup"] {{gap:6px;}}
+          div[role="radiogroup"] label {{
+            border:1px solid {LINE_2}; border-radius:100px; padding:5px 15px;
+            transition:border-color .25s, background .25s;
+          }}
+          div[role="radiogroup"] label:hover {{border-color:{AMBER_DIM};
+                                               background:rgba(224,162,74,.05);}}
+
+          .stButton > button {{
+            border-radius:100px; border:1px solid {LINE_2};
+            background:{INK}; color:#000; font-weight:600;
+            padding:.55rem 1.5rem; transition:transform .2s, box-shadow .3s;
+          }}
+          .stButton > button:hover {{
+            transform:translateY(-1px); border-color:{ACCENT};
+            box-shadow:0 8px 26px rgba(224,162,74,.22);
+          }}
+
+          /* ---- pipeline run: one row per stage ---- */
+          .runrow {{display:flex; align-items:center; gap:14px; padding:11px 2px;
+                    border-bottom:1px solid #131211; font-size:.9rem;}}
+          .runrow:last-child {{border-bottom:0;}}
+          .runrow .idx {{font-family:{MONO}; font-size:.7rem; color:{INK_FAINT};
+                         min-width:26px;}}
+          .runrow .nm {{color:{INK_FAINT}; min-width:200px;}}
+          .runrow .bar {{flex:1; height:4px; border-radius:3px; background:#181614;
+                         overflow:hidden;}}
+          .runrow .bar i {{display:block; height:100%; width:0; border-radius:3px;
+                           background:linear-gradient(90deg,{AMBER_DIM},{ACCENT});}}
+          .runrow .st {{font-family:{MONO}; font-size:.7rem; letter-spacing:.1em;
+                        text-transform:uppercase; color:{INK_FAINT}; min-width:96px;
+                        text-align:right;}}
+
+          .runrow.done .nm {{color:{INK};}}
+          .runrow.done .bar i {{width:100%;}}
+          .runrow.done .st {{color:{ACCENT};}}
+
+          /* the running stage sweeps, because a stage's real progress is not
+             observable from outside its process */
+          .runrow.live .nm, .runrow.live .st {{color:{ACCENT};}}
+          .runrow.live .bar i {{width:38%; animation: sweep 1.15s ease-in-out infinite;}}
+          @keyframes sweep {{
+            0%   {{transform:translateX(-110%);}}
+            100% {{transform:translateX(300%);}}
+          }}
+          .runrow.fail .nm, .runrow.fail .st {{color:{CRITICAL};}}
+          .runrow.fail .bar i {{width:100%; background:{CRITICAL};}}
         </style>
         """,
         unsafe_allow_html=True,

@@ -12,6 +12,7 @@ and the two drift apart exactly when it matters.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -25,6 +26,11 @@ from strata_dashboard import ui  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 STORE = ROOT / "store"
+
+# Where the landing page is served from. Override when it is not the local
+# static server -- the two are separate processes and neither can discover the
+# other, so the address has to be stated somewhere.
+LANDING_URL = os.environ.get("STRATA_LANDING_URL", "http://localhost:8899/")
 store.STORE_PATH = STORE
 
 st.set_page_config(
@@ -96,6 +102,11 @@ totals = _totals(str(STORE), stamp)
 # ---------------------------------------------------------------- chrome
 
 with st.sidebar:
+    # Back to the landing page. st.navigation only knows about pages inside
+    # this app, so the way out has to be an explicit external link.
+    st.page_link(LANDING_URL, label="Home", icon=":material/home:")
+    st.divider()
+
     st.markdown("## 🛰️ STRATA")
     st.caption("Dual-layer Bitcoin transaction forensics")
     st.markdown(
