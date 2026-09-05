@@ -1,0 +1,27 @@
+# Python dependencies for STRATA.
+#
+# Versions are the ones the pipeline and its verify suites were actually run
+# against. Lower bounds rather than exact pins, except where a floor is
+# load-bearing:
+#
+#   streamlit-aggrid < 1.2.0 enabled AG Grid Enterprise modules by default,
+#   which require a paid licence. The floor keeps us on Community features.
+#
+# For the air-gapped build, mirror these first:
+#   pip download -r requirements.txt -d ./wheelhouse
+
+# pipeline
+duckdb>=1.5.5
+pyarrow>=25.0.1
+pandas>=3.0.5
+numpy>=2.5.2
+
+# detection
+scikit-learn>=1.9.0
+shap>=0.52.0
+
+# dashboard
+streamlit>=1.62.0
+altair>=6.2.2
+streamlit-aggrid>=1.2.0
+st-link-analysis>=0.4.0
