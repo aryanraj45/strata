@@ -99,6 +99,44 @@ The problem statement references a table of AI/ML focus areas that was never att
 
 ---
 
+## Running it after a clone
+
+The dataset, the store and the Rust binary are all build outputs and none of
+them are committed, so a fresh clone has the code but nothing to look at yet.
+Four steps, from nothing to a running dashboard:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cargo build --release --manifest-path ingest/Cargo.toml   # the ingest binary
+.venv/bin/streamlit run dashboard/app.py                  # opens on :8502
+```
+
+The dashboard opens on its "run the pipeline first" screen. Go to **Pipeline →
+Run all six stages** and press it: that builds the dataset and the store in
+front of you, in about fifteen seconds, and every figure in the app comes from
+what it produced.
+
+To build the store from a terminal instead:
+
+```bash
+.venv/bin/python generator/generate.py --out data --volume 5950 --days 14 --seed 42
+./ingest/target/release/strata-ingest data/strata.* --geoip data/geoip --out store
+for stage in cluster graph fusion; do .venv/bin/python $stage/run.py --store store; done
+.venv/bin/python models/run.py --store store --data data
+```
+
+Pass the same `--seed` to get the same dataset. Each stage has a `verify.py`
+beside it that scores its output against the generator's ground truth; run
+those rather than trusting the numbers on screen.
+
+The landing page is static and needs no build:
+
+```bash
+python3 -m http.server 8899 --directory site      # opens on :8899
+```
+
+---
+
 ## Repository layout
 
 ```
