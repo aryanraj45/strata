@@ -6,7 +6,12 @@ import pandas as pd
 import streamlit as st
 
 from strata_dashboard import data as store
+from strata_dashboard import runner
 from strata_dashboard import ui
+
+ROOT = runner.ROOT
+STORE = ROOT / "store"
+DATA = ROOT / "data"
 
 STAGE_NOTES = {
     "Ingest": "Rust. Reads CSV, JSON and XML into one record shape, resolves country and ASN "
@@ -22,7 +27,72 @@ STAGE_NOTES = {
 }
 
 
+def _run_panel() -> None:
+    """Rebuild the store, live, in front of whoever is watching."""
+    left, right = st.columns([0.72, 0.28], vertical_alignment="center")
+    with left:
+        st.markdown("### Run the pipeline")
+        st.caption(
+            "Rebuilds the store from the generator up — six real stages, no replay. "
+            "Takes a few minutes; the page stays put until it finishes."
+        )
+    with right:
+        go = st.button("Run all six stages", width="stretch", key="run_pipeline")
+
+    board = st.empty()
+    log = st.container()
+
+    all_stages = runner.stages(STORE, DATA)
+
+    if not go:
+        # At rest, show the stages as they will run, so the panel is not an
+        # unexplained button.
+        board.markdown(
+            "".join(runner.row(i, s, "idle") for i, s in enumerate(all_stages)),
+            unsafe_allow_html=True,
+        )
+        return
+
+    states = ["idle"] * len(all_stages)
+    details = [""] * len(all_stages)
+
+    def paint() -> None:
+        board.markdown(
+            "".join(
+                runner.row(i, s, states[i], details[i])
+                for i, s in enumerate(all_stages)
+            ),
+            unsafe_allow_html=True,
+        )
+
+    for i, stage in enumerate(all_stages):
+        states[i] = "live"
+        paint()
+
+        ok, out, took = runner.run(stage)
+
+        if not ok:
+            states[i] = "fail"
+            paint()
+            st.error(f"**{stage.name}** failed after {took:.1f}s — the store is unchanged.")
+            with log:
+                st.code(out or "(no output)", language="text")
+            return
+
+        states[i] = "done"
+        details[i] = f"{took:.1f}s"
+        paint()
+
+    st.success("Store rebuilt. Reload any page to read the new figures.")
+    # The cached connection and frames still point at the old parquet files.
+    st.cache_data.clear()
+    st.cache_resource.clear()
+
+
 def render(db, totals: dict, alerts: pd.DataFrame) -> None:
+    _run_panel()
+    st.divider()
+
     st.markdown("### Pipeline and provenance")
     st.caption(
         "What each stage produced, read back from its own output — not from a log. If a figure "
