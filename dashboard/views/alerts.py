@@ -249,12 +249,24 @@ def render(db, totals: dict, alerts: pd.DataFrame) -> None:
         if pd.notna(alert["attribution_confidence"]) else "—",
     )
 
-    tabs = st.tabs(["Why flagged", "Network evidence", "Money flow", "Transactions"])
-    with tabs[0]:
+    # Deliberately not st.tabs. Streamlit renders every tab panel eagerly, and
+    # the inactive ones are laid out at zero width -- so the link-analysis
+    # iframe measured itself at 0x0 on mount and never recovered when its tab
+    # was selected. Rendering only the chosen panel means the graph mounts
+    # while it is actually visible.
+    PANELS = ["Why flagged", "Network evidence", "Money flow", "Transactions"]
+    panel = st.radio(
+        "Evidence", PANELS,
+        horizontal=True,
+        label_visibility="collapsed",
+        key=f"panel_{entity_id}",
+    )
+
+    if panel == "Why flagged":
         _why(db, alert)
-    with tabs[1]:
+    elif panel == "Network evidence":
         _network(db, alert)
-    with tabs[2]:
+    elif panel == "Money flow":
         _graph(db, entity_id)
-    with tabs[3]:
+    else:
         _transactions(db, entity_id)
