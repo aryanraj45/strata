@@ -21,6 +21,26 @@ from __future__ import annotations
 # without raggedness, so this is a structural rule rather than a tuned cutoff.
 MERGE_MIN_CONFIDENCE = 0.40
 
+# A change call is right about 94% of the time, and the cost of the other 6% is
+# not constant. Joining clusters of size |A| and |B| asserts |A|x|B| address
+# pairs, and if the call was wrong every one of them puts a stranger inside a
+# suspect's entity. So a change call gets a budget in pairs rather than one
+# global confidence cutoff.
+#
+# Both alternatives were measured on this dataset and were worse:
+#
+#   Raising MERGE_MIN_CONFIDENCE to 0.70 bought perfect precision by discarding
+#   the good merges along with the bad, halving attributed leads from 147 to 77.
+#
+#   Pricing on the smaller side rather than the product let a 6-address group
+#   weld onto a 99-address one -- 594 wrong pairs that looked like a cost of 6.
+#
+# The override exists because a merge over budget is still worth making when the
+# signals are emphatic; it recovers a little recall at no measurable cost to
+# precision.
+CHANGE_MERGE_BUDGET = 60         # pairs a single change call may risk
+CHANGE_MERGE_DEAR = 0.70         # a costly join needs this much confidence
+
 
 class UnionFind:
     """Address -> entity, with path compression and union by size."""
@@ -72,6 +92,9 @@ def cluster(
     """
     uf = UnionFind()
 
+    # Pass one: co-spending only. For a non-CoinJoin transaction every input
+    # was signed by one party, so these merges are correct by construction and
+    # need no confidence gate.
     for tx in transactions:
         for addr in tx["input_addresses"]:
             uf.add(addr)
@@ -87,12 +110,32 @@ def cluster(
         for addr in inputs[1:]:
             uf.union(inputs[0], addr)
 
-        if (
-            use_change
-            and tx.get("change_address")
+    if not use_change:
+        return uf
+
+    # Pass two: the change guesses, priced against clusters that have already
+    # settled. Doing this in the first pass prices them against whatever had
+    # been seen so far, which is close to nothing early on -- so a wrong call
+    # between two addresses that each later grew into a hundred-address entity
+    # looked cheap at the time and welded them together. That single merge
+    # produced 86% of all the wrongly-linked pairs.
+    for tx in transactions:
+        if tx["is_coinjoin"]:
+            continue
+        confidence = tx.get("change_confidence", 0.0)
+        if not (
+            tx.get("change_address")
             and tx.get("change_corroborated")
-            and tx.get("change_confidence", 0.0) >= min_change_confidence
+            and confidence >= min_change_confidence
         ):
-            uf.union(inputs[0], tx["change_address"])
+            continue
+
+        left, right = uf.find(tx["input_addresses"][0]), uf.find(tx["change_address"])
+        if left == right:
+            continue
+
+        at_risk = uf.size[left] * uf.size[right]
+        if at_risk <= CHANGE_MERGE_BUDGET or confidence >= CHANGE_MERGE_DEAR:
+            uf.union(left, right)
 
     return uf
