@@ -11,6 +11,7 @@ nothing reports 62% would be a lie told in CSS.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
@@ -49,6 +50,26 @@ def stages(store: Path, data: Path) -> list[Stage]:
         Stage("Detection", "Supervised and unsupervised models, SHAP explanations",
               [PY, "models/run.py", "--store", str(store), "--data", str(data)]),
     ]
+
+
+def blocked_because() -> str | None:
+    """Why a rebuild cannot run here, or None if it can.
+
+    The ingest stage is a compiled Rust binary and `ingest/target/` is not in
+    the repository, so a hosted deploy has the source but nothing to execute.
+    Better to say that up front than to let someone press the button and get a
+    path they have never seen in a traceback.
+    """
+    binary = ROOT / "ingest" / "target" / "release" / "strata-ingest"
+    if not binary.exists():
+        return (
+            "Rebuilding needs the compiled ingest binary, and it is not in this "
+            "environment — `ingest/target/` is a build artefact, so it is not "
+            "committed, and this host cannot run `cargo build`."
+        )
+    if not os.access(binary, os.X_OK):
+        return f"The ingest binary at {binary} is not executable here."
+    return None
 
 
 def row(i: int, stage: Stage, state: str, detail: str = "") -> str:

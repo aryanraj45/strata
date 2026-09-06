@@ -36,13 +36,32 @@ def _run_panel() -> None:
             "Rebuilds the store from the generator up — six real stages, no replay. "
             "Takes a few minutes; the page stays put until it finishes."
         )
+    blocked = runner.blocked_because()
+
     with right:
-        go = st.button("Run all six stages", width="stretch", key="run_pipeline")
+        go = st.button(
+            "Run all six stages",
+            width="stretch",
+            key="run_pipeline",
+            disabled=blocked is not None,
+        )
 
     board = st.empty()
     log = st.container()
 
     all_stages = runner.stages(STORE, DATA)
+
+    if blocked:
+        board.markdown(
+            "".join(runner.row(i, s, "idle") for i, s in enumerate(all_stages)),
+            unsafe_allow_html=True,
+        )
+        st.info(
+            f"{blocked}\n\nThe figures throughout this dashboard come from the "
+            "store committed with the repository, which this pipeline produced. "
+            "To rebuild it, clone and run locally — see the README."
+        )
+        return
 
     if not go:
         # At rest, show the stages as they will run, so the panel is not an
