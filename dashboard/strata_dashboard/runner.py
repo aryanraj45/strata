@@ -12,6 +12,7 @@ nothing reports 62% would be a lie told in CSS.
 from __future__ import annotations
 
 import os
+import platform
 import subprocess
 import sys
 import time
@@ -29,8 +30,27 @@ class Stage:
     argv: list[str]
 
 
+def ingest_binary() -> Path | None:
+    """The ingest executable to use here, or None if there isn't one.
+
+    A locally compiled build wins: it is the one whoever is working on the
+    parser just produced. Failing that, fall back to the statically linked
+    Linux build committed under ingest/prebuilt -- a hosted deploy has the Rust
+    source but no toolchain to turn it into anything.
+    """
+    candidates = [
+        ROOT / "ingest" / "target" / "release" / "strata-ingest",
+        ROOT / "ingest" / "prebuilt" / f"strata-ingest-{platform.system().lower()}"
+                                       f"-{platform.machine().lower()}",
+    ]
+    for path in candidates:
+        if path.exists() and os.access(path, os.X_OK):
+            return path
+    return None
+
+
 def stages(store: Path, data: Path) -> list[Stage]:
-    ingest = ROOT / "ingest" / "target" / "release" / "strata-ingest"
+    ingest = ingest_binary() or Path("strata-ingest-unavailable")
     return [
         # Volume and seed are pinned, not left to the generator's defaults.
         # Running with the defaults rebuilds a much smaller dataset, which
@@ -53,21 +73,16 @@ def stages(store: Path, data: Path) -> list[Stage]:
 
 
 def can_ingest() -> bool:
-    """Whether the compiled ingest stage can run in this environment.
-
-    `ingest/` is Rust and `ingest/target/` is a build artefact, so it is not
-    committed and a hosted deploy has the source with nothing to execute.
-    """
-    binary = ROOT / "ingest" / "target" / "release" / "strata-ingest"
-    return binary.exists() and os.access(binary, os.X_OK)
+    """Whether the ingest stage can run in this environment."""
+    return ingest_binary() is not None
 
 
-# Rebuilding the dataset means running the generator and then the Rust ingest.
-# Where that binary is absent the first two stages cannot run -- but the other
-# four are pure Python over a store that already exists, so they can, and they
-# are the stages that do the actual analysis. Running four real stages beats
-# disabling the button and showing nobody anything.
-NEEDS_INGEST = frozenset({"Generator", "Ingest"})
+# Only the ingest stage is compiled. The generator is pure standard-library
+# Python and runs anywhere -- it was grouped with ingest here by mistake, which
+# marked a stage unavailable that was never blocked. Because the seed is pinned
+# it regenerates byte-identical data, so re-running it stays consistent with a
+# store that was built from an earlier run.
+NEEDS_INGEST = frozenset({"Ingest"})
 
 
 def partition(all_stages: list[Stage]) -> tuple[list[Stage], list[Stage]]:
