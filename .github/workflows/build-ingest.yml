@@ -42,8 +42,12 @@ jobs:
           file "$BIN"
           "$BIN" --help
           # A dynamic executable here would defeat the point: it would then
-          # depend on whatever glibc the deploy happens to have.
-          file "$BIN" | grep -q "statically linked"
+          # depend on whatever glibc the deploy happens to have. musl reports a
+          # position-independent static build as "static-pie linked", not
+          # "statically linked", so accept either -- but still reject "dynamically
+          # linked", which is the case this guard exists for.
+          file "$BIN" | grep -qE "static-pie linked|statically linked"
+          ! file "$BIN" | grep -q "dynamically linked"
 
       - uses: actions/upload-artifact@v4
         with:
