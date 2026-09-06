@@ -52,30 +52,36 @@ def stages(store: Path, data: Path) -> list[Stage]:
     ]
 
 
-def blocked_because() -> str | None:
-    """Why a rebuild cannot run here, or None if it can.
+def can_ingest() -> bool:
+    """Whether the compiled ingest stage can run in this environment.
 
-    The ingest stage is a compiled Rust binary and `ingest/target/` is not in
-    the repository, so a hosted deploy has the source but nothing to execute.
-    Better to say that up front than to let someone press the button and get a
-    path they have never seen in a traceback.
+    `ingest/` is Rust and `ingest/target/` is a build artefact, so it is not
+    committed and a hosted deploy has the source with nothing to execute.
     """
     binary = ROOT / "ingest" / "target" / "release" / "strata-ingest"
-    if not binary.exists():
-        return (
-            "Rebuilding needs the compiled ingest binary, and it is not in this "
-            "environment — `ingest/target/` is a build artefact, so it is not "
-            "committed, and this host cannot run `cargo build`."
-        )
-    if not os.access(binary, os.X_OK):
-        return f"The ingest binary at {binary} is not executable here."
-    return None
+    return binary.exists() and os.access(binary, os.X_OK)
+
+
+# Rebuilding the dataset means running the generator and then the Rust ingest.
+# Where that binary is absent the first two stages cannot run -- but the other
+# four are pure Python over a store that already exists, so they can, and they
+# are the stages that do the actual analysis. Running four real stages beats
+# disabling the button and showing nobody anything.
+NEEDS_INGEST = frozenset({"Generator", "Ingest"})
+
+
+def partition(all_stages: list[Stage]) -> tuple[list[Stage], list[Stage]]:
+    """Split into (stages that can run here, stages that cannot)."""
+    if can_ingest():
+        return all_stages, []
+    runnable = [s for s in all_stages if s.name not in NEEDS_INGEST]
+    return runnable, [s for s in all_stages if s.name in NEEDS_INGEST]
 
 
 def row(i: int, stage: Stage, state: str, detail: str = "") -> str:
     """One stage as a row. `state` is idle | live | done | fail."""
     label = {"idle": "waiting", "live": "running", "done": detail or "done",
-             "fail": "failed"}[state]
+             "fail": "failed", "skip": "not here"}[state]
     return (
         f"<div class='runrow {state}'>"
         f"<span class='idx'>{i + 1:02d}</span>"

@@ -36,73 +36,72 @@ def _run_panel() -> None:
             "Rebuilds the store from the generator up — six real stages, no replay. "
             "Takes a few minutes; the page stays put until it finishes."
         )
-    blocked = runner.blocked_because()
+    all_stages = runner.stages(STORE, DATA)
+    runnable, unavailable = runner.partition(all_stages)
 
     with right:
         go = st.button(
-            "Run all six stages",
+            f"Run {'all six' if not unavailable else 'the analysis'} stages",
             width="stretch",
             key="run_pipeline",
-            disabled=blocked is not None,
         )
 
     board = st.empty()
     log = st.container()
 
-    all_stages = runner.stages(STORE, DATA)
+    # Index every stage by name so a skipped one keeps its number in the list.
+    order = {s.name: i for i, s in enumerate(all_stages)}
+    skipped = {s.name for s in unavailable}
 
-    if blocked:
-        board.markdown(
-            "".join(runner.row(i, s, "idle") for i, s in enumerate(all_stages)),
-            unsafe_allow_html=True,
-        )
-        st.info(
-            f"{blocked}\n\nThe figures throughout this dashboard come from the "
-            "store committed with the repository, which this pipeline produced. "
-            "To rebuild it, clone and run locally — see the README."
-        )
-        return
-
-    if not go:
-        # At rest, show the stages as they will run, so the panel is not an
-        # unexplained button.
-        board.markdown(
-            "".join(runner.row(i, s, "idle") for i, s in enumerate(all_stages)),
-            unsafe_allow_html=True,
-        )
-        return
-
-    states = ["idle"] * len(all_stages)
-    details = [""] * len(all_stages)
-
-    def paint() -> None:
+    def paint(states: dict, details: dict) -> None:
         board.markdown(
             "".join(
-                runner.row(i, s, states[i], details[i])
-                for i, s in enumerate(all_stages)
+                runner.row(order[s.name], s, states.get(s.name, "idle"),
+                           details.get(s.name, ""))
+                for s in all_stages
             ),
             unsafe_allow_html=True,
         )
 
-    for i, stage in enumerate(all_stages):
-        states[i] = "live"
-        paint()
+    base = {name: "skip" for name in skipped}
+
+    if not go:
+        # At rest, show the stages as they will run, so the panel is not an
+        # unexplained button.
+        paint(dict(base), {})
+        if unavailable:
+            st.caption(
+                "Two stages need the compiled Rust ingest binary, which is a build "
+                "artefact and so is not committed — this host cannot produce it. The "
+                "four analysis stages below run for real, over the store shipped with "
+                "the repository."
+            )
+        return
+
+    states, details = dict(base), {}
+
+    for stage in runnable:
+        states[stage.name] = "live"
+        paint(states, details)
 
         ok, out, took = runner.run(stage)
 
         if not ok:
-            states[i] = "fail"
-            paint()
+            states[stage.name] = "fail"
+            paint(states, details)
             st.error(f"**{stage.name}** failed after {took:.1f}s — the store is unchanged.")
             with log:
                 st.code(out or "(no output)", language="text")
             return
 
-        states[i] = "done"
-        details[i] = f"{took:.1f}s"
-        paint()
+        states[stage.name] = "done"
+        details[stage.name] = f"{took:.1f}s"
+        paint(states, details)
 
-    st.success("Store rebuilt. Reload any page to read the new figures.")
+    st.success(
+        f"{len(runnable)} stages re-ran against the store. "
+        "Reload any page to read the new figures."
+    )
     # The cached connection and frames still point at the old parquet files.
     st.cache_data.clear()
     st.cache_resource.clear()

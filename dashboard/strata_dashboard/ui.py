@@ -228,6 +228,11 @@ def inject_css() -> None:
             0%   {{transform:translateX(-110%);}}
             100% {{transform:translateX(300%);}}
           }}
+          /* a stage this host cannot run: stated, not hidden */
+          .runrow.skip .nm {{color:{INK_FAINT};}}
+          .runrow.skip .st {{color:{INK_FAINT};}}
+          .runrow.skip .bar i {{width:100%; background:#1f1c19;}}
+
           .runrow.fail .nm, .runrow.fail .st {{color:{CRITICAL};}}
           .runrow.fail .bar i {{width:100%; background:{CRITICAL};}}
         </style>
