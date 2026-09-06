@@ -89,26 +89,18 @@ footer{background:linear-gradient(180deg, rgba(0,0,0,.8), #000 40%)}
 /* ---------- hero ---------- */
 header{
   min-height:100svh; display:flex; flex-direction:column; justify-content:center;
-  position:relative; padding:140px 0 80px;
+  position:relative; padding:104px 0 288px;
 }
 .glow{
   position:absolute; inset:0; pointer-events:none;
   background:radial-gradient(760px 420px at 50% 22%, rgba(224,162,74,.09), transparent 70%);
 }
-.badge{
-  display:inline-flex; align-items:center; gap:9px; align-self:center;
-  padding:7px 16px 7px 12px; border-radius:100px;
-  border:1px solid var(--line-2); background:rgba(255,255,255,.02);
-  font-size:.79rem; color:var(--ink-2); letter-spacing:.01em;
-}
-.badge .dot{width:6px; height:6px; border-radius:50%; background:var(--amber);
-  box-shadow:0 0 0 3px rgba(224,162,74,.16); animation:pulse 2.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 h1{
   font-family:var(--serif); font-weight:400;
   font-size:clamp(2.7rem, 7.2vw, 5.6rem); line-height:1.03;
-  letter-spacing:-.025em; text-align:center; margin:34px 0 0;
+  letter-spacing:-.025em; text-align:center; margin:0;
 }
 h1 .fade{color:var(--ink-3)}
 h1 em{font-style:normal; color:var(--amber)}
@@ -438,10 +430,6 @@ footer .mark b{color:var(--amber); font-weight:400}
 <header>
   <div class="glow"></div>
   <div class="wrap">
-    <div style="display:flex; justify-content:center">
-      <span class="badge rv"><span class="dot"></span>SIH 2026 · Problem 26146 · National Technical Research Organisation</span>
-    </div>
-
     <h1 class="rv" style="transition-delay:.08s">
       Bitcoin shows the money.<br>
       <span class="fade">We show</span> <em>the person.</em>
