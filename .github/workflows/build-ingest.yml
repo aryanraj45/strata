@@ -1,0 +1,52 @@
+# Builds the Linux ingest binary that the hosted dashboard runs.
+#
+# `ingest/` is Rust and Streamlit Cloud has no toolchain, so the deploy has the
+# source and nothing to execute. The binary therefore ships in the repository --
+# and because a committed binary is only trustworthy if you can see where it
+# came from, this workflow is how it is produced. It rebuilds whenever the Rust
+# source changes, so the committed artefact cannot quietly drift away from the
+# code the way a hand-built one already did once.
+#
+# musl, statically linked: no assumption about the host's glibc version.
+
+name: build ingest
+
+on:
+  push:
+    paths:
+      - "ingest/src/**"
+      - "ingest/Cargo.toml"
+      - "ingest/Cargo.lock"
+      - ".github/workflows/build-ingest.yml"
+  workflow_dispatch:
+
+jobs:
+  linux-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the musl target
+        run: |
+          rustup target add x86_64-unknown-linux-musl
+          sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Build
+        working-directory: ingest
+        run: cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Check it is static and it runs
+        working-directory: ingest
+        run: |
+          BIN=target/x86_64-unknown-linux-musl/release/strata-ingest
+          file "$BIN"
+          "$BIN" --help
+          # A dynamic executable here would defeat the point: it would then
+          # depend on whatever glibc the deploy happens to have.
+          file "$BIN" | grep -q "statically linked"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strata-ingest-linux-x86_64
+          path: ingest/target/x86_64-unknown-linux-musl/release/strata-ingest
+          if-no-files-found: error
