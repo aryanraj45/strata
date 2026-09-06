@@ -16,6 +16,7 @@ import platform
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,7 +28,11 @@ PY = sys.executable
 class Stage:
     name: str
     note: str
-    argv: list[str]
+    # Built when the stage is about to run, not when the panel is drawn. The
+    # ingest command names the files the generator is about to write, so
+    # deciding its arguments up front asks what exists before anything has
+    # produced it -- which on a fresh checkout is nothing at all.
+    build_argv: Callable[[], list[str]]
 
 
 def ingest_binary() -> Path | None:
@@ -50,25 +55,29 @@ def ingest_binary() -> Path | None:
 
 
 def stages(store: Path, data: Path) -> list[Stage]:
-    ingest = ingest_binary() or Path("strata-ingest-unavailable")
+    def ingest_argv() -> list[str]:
+        binary = ingest_binary() or Path("strata-ingest-unavailable")
+        sources = sorted(str(p) for p in data.glob("strata.*"))
+        return [str(binary), *sources, "--geoip", str(data / "geoip"),
+                "--out", str(store)]
+
     return [
         # Volume and seed are pinned, not left to the generator's defaults.
         # Running with the defaults rebuilds a much smaller dataset, which
         # quietly moves every headline figure the write-up quotes.
         Stage("Generator", "Synthesises the dataset and its ground truth",
-              [PY, "generator/generate.py", "--out", str(data),
-               "--volume", "5950", "--days", "14", "--seed", "42"]),
+              lambda: [PY, "generator/generate.py", "--out", str(data),
+                       "--volume", "5950", "--days", "14", "--seed", "42"]),
         Stage("Ingest", "Rust. CSV, JSON and XML into one shape, GeoIP resolved",
-              [str(ingest), *sorted(str(p) for p in data.glob("strata.*")),
-               "--geoip", str(data / "geoip"), "--out", str(store)]),
+              ingest_argv),
         Stage("Clustering", "CoinJoins filtered, then addresses spent together",
-              [PY, "cluster/run.py", "--store", str(store)]),
+              lambda: [PY, "cluster/run.py", "--store", str(store)]),
         Stage("Graph", "Peeling chains recovered as paths",
-              [PY, "graph/run.py", "--store", str(store)]),
+              lambda: [PY, "graph/run.py", "--store", str(store)]),
         Stage("Fusion", "Network sightings correlated with ledger entities",
-              [PY, "fusion/run.py", "--store", str(store)]),
+              lambda: [PY, "fusion/run.py", "--store", str(store)]),
         Stage("Detection", "Supervised and unsupervised models, SHAP explanations",
-              [PY, "models/run.py", "--store", str(store), "--data", str(data)]),
+              lambda: [PY, "models/run.py", "--store", str(store), "--data", str(data)]),
     ]
 
 
@@ -110,9 +119,10 @@ def row(i: int, stage: Stage, state: str, detail: str = "") -> str:
 def run(stage: Stage, timeout: int = 900) -> tuple[bool, str, float]:
     """Run one stage. Returns (ok, output tail, seconds)."""
     began = time.monotonic()
+    argv = stage.build_argv()
     try:
         proc = subprocess.run(
-            stage.argv, cwd=ROOT, capture_output=True, text=True, timeout=timeout,
+            argv, cwd=ROOT, capture_output=True, text=True, timeout=timeout,
         )
     except FileNotFoundError as err:
         return False, f"not found: {err}", time.monotonic() - began
