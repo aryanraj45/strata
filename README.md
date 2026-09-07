@@ -65,16 +65,25 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 ## Team
 
-| Name | Role |
-|---|---|
-| Raj Aryan | `<ROLE>` |
-| `<TEAMMATE>` | `<ROLE>` |
-| `<TEAMMATE>` | `<ROLE>` |
-| `<TEAMMATE>` | `<ROLE>` |
-| `<TEAMMATE>` | `<ROLE>` |
-| `<TEAMMATE>` | `<ROLE>` |
+**Team `<TEAM NAME>`** · Netaji Subhas University of Technology
 
-<!-- Fill in the remaining names and roles before submitting. -->
+**Team Leader:** Raj Aryan — [@aryanraj45](https://github.com/aryanraj45)
+
+| Name | Roll Number | GitHub | Role |
+|---|---|---|---|
+| Raj Aryan | 2024UIC4038 | [@aryanraj45](https://github.com/aryanraj45) | Team Leader · pipeline architecture |
+| Mansi Singh | 2024UIC3589 | [@MansiS7](https://github.com/MansiS7) | Dashboard & presentation |
+| Devansh Vashisht | 2024UIC3506 | [@devvaansh](https://github.com/devvaansh) | Ingest and tooling |
+| Priyanshu | `<ROLL>` | `<GITHUB>` | Research |
+| Srushti | 2026UCA1845 | `<GITHUB>` | Research |
+| Vagisha Mandal | 2026UCA1860 | `<GITHUB>` | Research & documentation |
+
+<!-- Still to fill in before submitting:
+     - the team name above
+     - Priyanshu's roll number: the number given (2024UIC3506) is already
+       Devansh's, so one of the two is wrong
+     - GitHub handles for Priyanshu, Srushti and Vagisha
+-->
 
 ---
 
