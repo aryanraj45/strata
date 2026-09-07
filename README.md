@@ -7,6 +7,85 @@
 
 ---
 
+## Project information
+
+| | |
+|---|---|
+| **Project title** | STRATA — AI-Powered Monitoring and Analysis of Bitcoin Transaction Traffic |
+| **PS ID** | 26146 |
+| **PS title** | AI-Powered Monitoring & Analysis of Bitcoin Transaction Traffic |
+| **Organisation** | National Technical Research Organisation (NTRO) |
+| **Category** | Software |
+| **Theme** | Blockchain & Cybersecurity |
+
+**Live:** [landing page](https://strata-alpha-two.vercel.app/) · [forensic explorer](https://strata-forensics.streamlit.app/)
+Both are public and need no login. Reviewer walkthrough: [`submission/DEMO.md`](submission/DEMO.md).
+
+---
+
+## Key features
+
+- **Dual-layer correlation.** Joins blockchain records with peer-to-peer network
+  telemetry on approximate time — the join no ledger-only tool can make, and
+  what turns a wallet address into a candidate host.
+- **Statistical attribution, not assertion.** Every lead carries the sighting
+  count it rests on and the probability of seeing that count by accident,
+  corrected for the number of host-and-entity pairs tested.
+- **Entity resolution that refuses to guess.** CoinJoins are detected and
+  excluded before clustering, because clustering one merges unrelated people
+  and nothing errors.
+- **Peeling-chain recovery.** Laundering chains reconstructed as graph paths,
+  which clustering structurally cannot see.
+- **Explainable scoring.** A supervised model for known patterns and an
+  unsupervised one for anything new, with every score decomposed by SHAP into
+  named factors. Never a bare number.
+- **Bulk multi-format ingest.** CSV, JSON and XML into one shape at ~40,000
+  records/sec, with a SHA-256 chain-of-custody manifest and GeoIP enrichment.
+- **Runs with the network switched off.** No outbound request at any stage.
+- **Measured, not claimed.** Every stage ships a test suite scored against the
+  generator's ground truth, including negative controls.
+
+---
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Landing page](assets/screenshots/01-landing.jpg) | ![Explorer overview](assets/screenshots/02-explorer-overview.jpg) |
+| *Landing page* | *Case overview* |
+| ![Explainability](assets/screenshots/03-alert-explainability.jpg) | ![Money flow graph](assets/screenshots/04-money-flow-graph.jpg) |
+| *Why an entity was flagged — SHAP factors* | *Money flow and first-relay sightings* |
+
+![Pipeline](assets/screenshots/05-pipeline-run.jpg)
+*The pipeline, runnable live from the dashboard*
+
+More in [`assets/screenshots/`](assets/screenshots/).
+
+---
+
+## Team
+
+| Name | Role |
+|---|---|
+| Raj Aryan | `<ROLE>` |
+| `<TEAMMATE>` | `<ROLE>` |
+| `<TEAMMATE>` | `<ROLE>` |
+| `<TEAMMATE>` | `<ROLE>` |
+| `<TEAMMATE>` | `<ROLE>` |
+| `<TEAMMATE>` | `<ROLE>` |
+
+<!-- Fill in the remaining names and roles before submitting. -->
+
+---
+
+## Submission
+
+- Presentation: [`submission/PRESENTATION.md`](submission/PRESENTATION.md)
+- Demo and reviewer walkthrough: [`submission/DEMO.md`](submission/DEMO.md)
+- Architecture: [`docs/architecture.md`](docs/architecture.md)
+
+---
+
 ## The idea
 
 The Bitcoin ledger tells you **what** moved. It never tells you **who**.
