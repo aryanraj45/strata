@@ -65,7 +65,7 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 ## Team
 
-**Team `<TEAM NAME>`** · Netaji Subhas University of Technology
+**Team LATENT** · Netaji Subhas University of Technology
 
 **Team Leader:** Raj Aryan — [@aryanraj45](https://github.com/aryanraj45)
 
@@ -73,17 +73,10 @@ More in [`assets/screenshots/`](assets/screenshots/).
 |---|---|---|---|
 | Raj Aryan | 2024UIC4038 | [@aryanraj45](https://github.com/aryanraj45) | Team Leader · pipeline architecture |
 | Mansi Singh | 2024UIC3589 | [@MansiS7](https://github.com/MansiS7) | Dashboard & presentation |
-| Devansh Vashisht | 2024UIC3506 | [@devvaansh](https://github.com/devvaansh) | Ingest and tooling |
-| Priyanshu | `<ROLL>` | `<GITHUB>` | Research |
-| Srushti | 2026UCA1845 | `<GITHUB>` | Research |
-| Vagisha Mandal | 2026UCA1860 | `<GITHUB>` | Research & documentation |
-
-<!-- Still to fill in before submitting:
-     - the team name above
-     - Priyanshu's roll number: the number given (2024UIC3506) is already
-       Devansh's, so one of the two is wrong
-     - GitHub handles for Priyanshu, Srushti and Vagisha
--->
+| Devansh Vashisht | 2024UIC3507 | [@devvaansh](https://github.com/devvaansh) | Ingest and tooling |
+| Priyanshu Mahalan | 2024UIC3506 | [@Priyanshu-rgbb](https://github.com/Priyanshu-rgbb) | Research |
+| Srushti Chaudhari | 2026UCA1845 | [@srushtichaudhariug26](https://github.com/srushtichaudhariug26) | Research |
+| Vagisha Mandal | 2026UCA1860 | [@vagisha26](https://github.com/vagisha26) | Research & documentation |
 
 ---
 
