@@ -67,13 +67,13 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 **Team LATENT** · Netaji Subhas University of Technology
 
-**Team Leader:** Raj Aryan — [@aryanraj45](https://github.com/aryanraj45)
+**Team Leader:** Raj Aryan — [@aryanraj45](https://github.com/aryanraj45)Ingest and tooling 
 
 | Name | Roll Number | GitHub | Role |
 |---|---|---|---|
 | Raj Aryan | 2024UIC4038 | [@aryanraj45](https://github.com/aryanraj45) | Team Leader · pipeline architecture |
-| Mansi Singh | 2024UIC3589 | [@MansiS7](https://github.com/MansiS7) | Dashboard & presentation |
-| Devansh Vashisht | 2024UIC3507 | [@devvaansh](https://github.com/devvaansh) | Ingest and tooling |
+| Devansh Vashisht| 2024UIC3507 |[@devvaansh](https://github.com/devvaansh)| Ingest and tooling |
+| Mansi Singh | 2024UIC3589 | [@MansiS7](https://github.com/MansiS7)| Dashboard & presentation  |
 | Priyanshu Mahalan | 2024UIC3506 | [@Priyanshu-rgbb](https://github.com/Priyanshu-rgbb) | Research |
 | Srushti Chaudhari | 2026UCA1845 | [@srushtichaudhariug26](https://github.com/srushtichaudhariug26) | Research |
 | Vagisha Mandal | 2026UCA1860 | [@vagisha26](https://github.com/vagisha26) | Research & documentation |
