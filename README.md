@@ -82,7 +82,7 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 ## Submission
 
-- Presentation: [`https://drive.google.com/drive/folders/1gTYdoBcpPKOEs9QfW0U6DAmdZ5HY2TNg?usp=sharing`](submission/PRESENTATION.md)
+- Presentation: [`submission.md`](https://drive.google.com/drive/folders/1gTYdoBcpPKOEs9QfW0U6DAmdZ5HY2TNg?usp=drive_link)
 - Demo and reviewer walkthrough: [`submission/DEMO.md`](submission/DEMO.md)
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
 
