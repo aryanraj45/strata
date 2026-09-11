@@ -6,15 +6,8 @@
 
 ## Final presentation
 
-<!-- Upload the PPTX to this folder and replace the line below with a link to it,
-     e.g. [Open the final presentation](./STRATA_SIH2026_Presentation.pptx) -->
-
-`<ADD THE PPTX HERE, OR PASTE A GOOGLE DRIVE / ONEDRIVE VIEWER LINK>`
-
-If the file is too large for GitHub, upload it to Drive/OneDrive, set sharing to
-*anyone with the link can view*, and paste the link above. Check it in a
-logged-out browser before submitting — a link that asks the reviewer to request
-access counts as inaccessible.
+[Open the final presentation](./STRATA_SIH2026_Presentation.pdf) — six slides,
+the official SIH idea-PPT template.
 
 ## What the deck should cover
 
