@@ -82,7 +82,7 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 ## Submission
 
-- Presentation: [`submission/PRESENTATION.md`](submission/PRESENTATION.md) — or the [PDF directly](submission/STRATA_SIH2026_Presentation.pdf)
+- Presentation: [`submission/PRESENTATION.md`](submission/PRESENTATION.md) — or the [PPT directly](submission/STRATA_SIH2026_Presentation.pdf)
 - Demo and reviewer walkthrough: [`submission/DEMO.md`](submission/DEMO.md)
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
 
