@@ -82,6 +82,7 @@ More in [`assets/screenshots/`](assets/screenshots/).
 
 ## Submission
 
+- Live deployment: https://strata-alpha-two.vercel.app/
 - Presentation: [`submission/PRESENTATION.md`](submission/PRESENTATION.md) — or the [PPT directly](submission/STRATA_SIH2026_Presentation.pdf)
 - Demo and reviewer walkthrough: [`submission/DEMO.md`](submission/DEMO.md)
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
