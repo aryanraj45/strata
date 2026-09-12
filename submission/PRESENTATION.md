@@ -9,6 +9,8 @@
 [Open the final presentation](./STRATA_SIH2026_Presentation.pdf) — six slides,
 the official SIH idea-PPT template.
 
+**Live deployment:** https://strata-alpha-two.vercel.app/
+
 ## What the deck should cover
 
 The repository already documents the system in depth; the deck exists to carry
