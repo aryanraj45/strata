@@ -20,7 +20,7 @@ reviewer can start from either one.
 <!-- Optional. Paste a YouTube or Google Drive link and check it while logged
      out — a link that asks the reviewer to request access counts as missing. -->
 
-`<PASTE YOUTUBE OR GOOGLE DRIVE LINK, OR DELETE THIS SECTION>`
+`To be Added`
 
 ## Walkthrough for a reviewer
 
